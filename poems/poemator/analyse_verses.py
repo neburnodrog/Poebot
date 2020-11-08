@@ -1,22 +1,19 @@
 import string
 from .help_funcs import (last_word_finder,
-                             block_separator,
-                             consonant_rhyme_finder,
-                             assonant_rhyme_finder,
-                             type_verse,
-                             counter)
+                         block_separator,
+                         consonant_rhyme_finder,
+                         assonant_rhyme_finder,
+                         type_verse,
+                         counter)
 
 
 vowels = "aeiouáéíóúAEIOUÁÉÍÓÚ"
 vowels_h = vowels + "h"
-consonants = (
-    "".join((letter for letter in string.ascii_letters if letter not in vowels)) + "ñÑ"
-)
+consonants = ("".join((letter for letter in string.ascii_letters if letter not in vowels)) + "ñÑ")
 debiles = "UIui"
 debiles_tonicas = "ÚÍúí"
 fuertes = "AEOaeo"
 fuertes_tildadas = "ÁÉÓáéó"
-##############################
 vowels_tildadas = "áéíóúÁÉÍÓÚ"
 punct = "¡!\"#$%&'()*+,./:;<=>¿?@[\\]^_—{|}~-«”»"
 

@@ -5,9 +5,9 @@ import datetime
 from os import path, mkdir
 from .analyse_verses import Syllabifier
 from .help_funcs import last_word_finder, decapitalize, assonant_rhyme_finder
-from data.online_rhymer import Rhymer, getting_word_type, find_first_letter
-from data.db_funcs import fetch_verses, fetch_rhyme, is_subset_of
-from typing import Tuple, List, Optional, Dict, Any
+from .online_rhymer import Rhymer, getting_word_type, find_first_letter
+from poems.models import fetch_verses, fetch_rhyme
+from typing import Tuple, List, Optional, Dict
 
 Verse = Tuple[bool, bool, bool, str, str]
 punct = string.punctuation + " ¡¿"
@@ -59,12 +59,17 @@ class PoemAutomator:
                 if not self.rhymes_to_use[key.lower()]:
                     self.rhymes_to_use[key] = input(f"Rima consonante {key}: -")
 
-                    verses_to_use = fetch_verses(self.long_verses, self.rhymes_to_use[key], cons=True, unique=True)
+                    verses_to_use = fetch_verses(verse_length=self.long_verses,
+                                                 cons_rhy=self.rhymes_to_use[key],
+                                                 unique=True)
+
                     while not verses_to_use:
                         self.rhymes_to_use[key] = input(
                             f"La rima consonante que has especificado no existe en la base de datos. Prueba de nuevo: ")
 
-                        verses_to_use = fetch_verses(self.long_verses, self.rhymes_to_use[key], cons=True, unique=True)
+                        verses_to_use = fetch_verses(verse_length=self.long_verses,
+                                                     cons_rhy=self.rhymes_to_use[key],
+                                                     unique=True)
 
                     self.verses_to_use[key] = verses_to_use
 
@@ -75,12 +80,14 @@ class PoemAutomator:
                         f"Rima consonante {key} (ha de rimar asonantemente con -> {key.lower()}): -"
                     )
 
-                    while not is_subset_of(self.long_verses, self.rhymes_to_use[key.lower()], self.rhymes_to_use[key]):
+                    while not Syllabifier(self.rhymes_to_use[key]).assonant_rhyme == self.rhymes_to_use[key.lower()]:
                         self.rhymes_to_use[key] = input(
                             f"Rima consonante {key} (HA DE RIMAR ASONANTEMENTE CON -> {key.lower()}): -"
                         )
 
-                    verses_to_use = fetch_verses(self.long_verses, self.rhymes_to_use[key], cons=True, unique=True)
+                    verses_to_use = fetch_verses(verse_length=self.long_verses,
+                                                 cons_rhy=self.rhymes_to_use[key],
+                                                 unique=True)
 
                     self.verses_to_use[key] = verses_to_use
 
@@ -92,12 +99,16 @@ class PoemAutomator:
 
                     self.rhymes_to_use[key] = input(f"Rima asonante {key}: -")
 
-                    verses_to_use = fetch_verses(self.long_verses, self.rhymes_to_use[key], cons=False, unique=True)
+                    verses_to_use = fetch_verses(verse_length=self.long_verses,
+                                                 asson_rhy=self.rhymes_to_use[key],
+                                                 unique=True)
                     while not verses_to_use:
                         self.rhymes_to_use[key] = input(
                             f"La rima asonante que has especificado no existe en la base de datos. Prueba de nuevo: ")
 
-                        verses_to_use = fetch_verses(self.long_verses, self.rhymes_to_use[key], cons=False, unique=True)
+                        verses_to_use = fetch_verses(verse_length=self.long_verses,
+                                                     asson_rhy=self.rhymes_to_use[key],
+                                                     unique=True)
 
                     self.verses_to_use[key] = verses_to_use
 
@@ -109,17 +120,27 @@ class PoemAutomator:
 
                     self.rhymes_to_use[key] = asson_rhyme
 
-                    self.verses_to_use[key] = fetch_verses(self.long_verses, asson_rhyme, cons=False, unique=True)
+                    self.verses_to_use[key] = fetch_verses(verse_length=self.long_verses,
+                                                           asson_rhy=asson_rhyme,
+                                                           unique=True)
 
     def random_rhymes(self) -> None:
         for key in self.rhymes_to_use.keys():
             cons = True if key == key.upper() else False
             limit = self.rhy_seq.count(key) + (self.rhy_seq.count(key) / 2)
-            rhyme_to_use = fetch_rhyme(self.long_verses, limit, cons=cons)
-            verses_to_use = fetch_verses(self.long_verses, rhyme_to_use, cons=cons, unique=True)
+            rhyme_to_use = fetch_rhyme(self.long_verses, limit=limit, cons=cons)
+
+            if cons:
+                verses_to_use = fetch_verses(verse_length=self.long_verses, cons_rhy=rhyme_to_use, unique=True)
+            else:
+                verses_to_use = fetch_verses(verse_length=self.long_verses, asson_rhy=rhyme_to_use, unique=True)
+
             while len(verses_to_use) < self.rhy_seq.count(key):
-                rhyme_to_use = fetch_rhyme(self.long_verses, self.rhy_seq.count(key), cons=cons)
-                verses_to_use = fetch_verses(self.long_verses, rhyme_to_use, cons=cons, unique=True)
+                rhyme_to_use = fetch_rhyme(self.long_verses, limit=self.rhy_seq.count(key), cons=cons)
+                if cons:
+                    verses_to_use = fetch_verses(verse_length=self.long_verses, cons_rhy=rhyme_to_use, unique=True)
+                else:
+                    verses_to_use = fetch_verses(verse_length=self.long_verses, asson_rhy=rhyme_to_use, unique=True)
 
             self.rhymes_to_use[key] = rhyme_to_use
             self.verses_to_use[key] = verses_to_use
@@ -159,20 +180,19 @@ class PoemAutomator:
                 return verse_text
 
             except IndexError:
-                type_str = "beg" if type_verse == 0 else "int" if type_verse == 1 else "end"
-                rhyme_to_use_now = fetch_rhyme(self.long_verses, 10)
-                verses = fetch_verses(self.long_verses,
-                                      rhyme_to_use_now,
-                                      type_verse=type_str)
+                type_verse_kw = {"is_beg": True} if type_verse == 0 else {"is_int": True} if type_verse == 1 else {"is_end": True}
+                rhyme_to_use_now = fetch_rhyme(self.long_verses, limit=10)
+                verses = fetch_verses(verse_length=self.long_verses,
+                                      cons_rhy=rhyme_to_use_now,
+                                      **type_verse_kw)
 
                 verse = random.choice(verses)  # This Verse is a random verse with anther rhyme.
-                last_word = verse[4]  # The new word need the same number of syllables and the same type as this one.
 
                 word_to_rhyme_with = random.choice(self.words_used[rhyme_code])
                 rhy_type = "c" if rhyme_code.upper() == rhyme_code else "a"
-                num_syll = Syllabifier(last_word).syllables
-                last_word_type = getting_word_type(last_word)
-                first_letter = find_first_letter(last_word, sentence=verse[3])
+                num_syll = Syllabifier(verse.last_word).syllables
+                last_word_type = getting_word_type(verse.last_word)
+                first_letter = find_first_letter(verse.last_word)
 
                 words_used = []
                 for word_list in self.words_used.values():
@@ -227,7 +247,6 @@ def online_rhyme_finder(word: str,
                         first_letter: Optional[str] = None,
                         word_type: Optional[str] = None,
                         words_used: Optional[List] = None) -> str:
-
     rhymes_object = Rhymer(word, rhyme_type, syllables, first_letter, word_type, words_used)
     rhymes_list = rhymes_object.getting_cronopista()
 

@@ -1,7 +1,5 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView, ListView
 from .models import Verse
-from django.db.models.query import QuerySet
 
 
 # Create your views here.
