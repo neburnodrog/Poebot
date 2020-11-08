@@ -1,0 +1,14 @@
+{% extends "poems/base.html" %}
+
+{% block title %}Poem{% endblock %}
+
+{% block content %}
+    <h1>Verses</h1>
+        <ul>
+            {% for verse in object_list %}
+                <li>{{ verse.verse_text }}</li>
+            {% empty %}
+                <li>No verses yet.</li>
+            {% endfor %}
+        </ul>
+{% endblock %}

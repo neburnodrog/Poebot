@@ -1,0 +1,33 @@
+{% extends "poems/base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+    <form name="myform" method="GET" action="{% url 'poems:poem' %}">
+        {% for elem in fields %}
+            {% if elem.name == 'cons_rhy' %}
+                <label for="{{ elem.name }}">Consonant Rhyme: </label><br>
+                <input type="text" name="{{ elem.name }}"/><br>
+            {% elif elem.name == 'asson_rhy' %}
+                <label for="{{ elem.name }}">Assonant Rhyme: </label><br>
+                <input type="text" name="{{ elem.name }}"/><br>
+            {% elif elem.name == 'verse_length' %}
+                <label for="{{ elem.name }}">Verse Length: </label><br>
+                <input type="number" name="{{ elem.name }}"/><br>
+            {% elif elem.name == 'last_word' %}
+                <label for="{{ elem.name }}">Last Word: </label><br>
+                <input type="text" name="{{ elem.name }}"/><br>
+            {% elif elem.name == 'is_beg' %}
+                <input id="is_beg" type="radio" name="verse_type" value="is_beg"/>
+                <label for="is_beg">Beginning verse</label><br>
+            {% elif elem.name == 'is_int' %}
+                <input id="is_int" type="radio" name="verse_type" value="is_int"/>
+                <label for="is_int">Intermediate verse</label><br>
+            {% elif elem.name == 'is_end' %}
+                <input id="is_end" type="radio" name="verse_type" value="is_end"/>
+                <label for="is_end">Final verse: </label><br>
+            {% endif %}
+        {% endfor %}
+        <br><hr><input type="submit" name="submit" placeholder="Submit"/>
+    </form>
+{% endblock %}
