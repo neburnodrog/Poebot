@@ -2,14 +2,15 @@
 import random
 import string
 import datetime
-from os import path, mkdir
-from .analyse_verses import Syllabifier
-from .help_funcs import last_word_finder, decapitalize, assonant_rhyme_finder
-from .online_rhymer import Rhymer, getting_word_type, find_first_letter
-from poems.models import fetch_verses, fetch_rhyme
 from typing import Tuple, List, Optional, Dict
+from os import path, mkdir
 
-Verse = Tuple[bool, bool, bool, str, str]
+from poems.analyse_verses import Syllabifier
+from poems.help_funcs import last_word_finder, decapitalize, assonant_rhyme_finder
+from poems.online_rhymer import Rhymer, getting_word_type, find_first_letter
+from poems.models import fetch_verses, fetch_rhyme, Verse
+
+
 punct = string.punctuation + " ¡¿"
 vowels = "aeiouáéíóúÁÉÍÓÚAEIOU"
 

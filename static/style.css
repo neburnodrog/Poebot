@@ -1,11 +1,3 @@
-body {
-  background-color: #E5E8E8;
-}
-
-div jumbotron{
-  background-color: #D5DBDB;
-}
-
 h1 {
   text-align: center;
 }
@@ -14,8 +6,4 @@ ul {
   list-style-type: none;
   margin-top: 50px;
   margin-left: 300px;
-}
-
-div btn{
-  background-color: white;
 }

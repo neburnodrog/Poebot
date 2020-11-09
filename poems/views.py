@@ -5,8 +5,6 @@ from .models import Verse
 # Create your views here.
 class IndexView(TemplateView):
     template_name = "poems/index.html"
-    all_fields = Verse._meta.get_fields()
-    extra_context = {"fields": all_fields}
 
 
 class VerseView(ListView):

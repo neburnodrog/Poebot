@@ -2,8 +2,6 @@ import bs4
 import requests
 from typing import List, Optional
 
-"""FROM FIlES TO DB CHANGE EVERYTHING"""
-
 
 class Rhymer:
     def __init__(self,

@@ -1,11 +1,10 @@
 import string
-from .help_funcs import (last_word_finder,
-                         block_separator,
-                         consonant_rhyme_finder,
-                         assonant_rhyme_finder,
-                         type_verse,
-                         counter)
-
+from poems.help_funcs import (last_word_finder,
+                              block_separator,
+                              consonant_rhyme_finder,
+                              assonant_rhyme_finder,
+                              type_verse,
+                              counter)
 
 vowels = "aeiouáéíóúAEIOUÁÉÍÓÚ"
 vowels_h = vowels + "h"
@@ -46,8 +45,8 @@ class Syllabifier:
                     try:
                         if syllabified_sentence.strip()[-1] in vowels:
                             if (syllabified_sentence.strip()[-1] in debiles
-                                and block in debiles
-                                and sentence[i + 1] not in "ns"
+                                    and block in debiles
+                                    and sentence[i + 1] not in "ns"
                             ):
                                 syllabified_sentence += "-" + block
                                 block = ""
@@ -64,9 +63,9 @@ class Syllabifier:
                 elif len(block) == 2:
                     try:
                         if (
-                            block[0] in "hH"
-                            and syllabified_sentence.strip()[-1] in vowels
-                            and (not sentence[i+1] in fuertes or sentence[i+1] in debiles_tonicas)
+                                block[0] in "hH"
+                                and syllabified_sentence.strip()[-1] in vowels
+                                and (not sentence[i + 1] in fuertes or sentence[i + 1] in debiles_tonicas)
                         ):
                             syllabified_sentence += block
                             block = ""
@@ -102,7 +101,7 @@ class Syllabifier:
                         block = ""
 
             elif i == len(sentence) - 1 and (
-                letter in consonants or letter in string.punctuation
+                    letter in consonants or letter in string.punctuation
             ):
                 syllabified_sentence += letter
 
