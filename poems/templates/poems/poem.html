@@ -5,8 +5,8 @@
 {% block content %}
         <ul>
             {% for verse in object_list %}
-                <li><div class="btn btn-light">Change Verse</div>           {{ verse.verse_text }}</li>
-
+                <!--TODO change into table. 1.col: verse, 2.col: button-->
+                <li><div class="btn btn-light">Change Verse </div> {{ verse.verse_text }}</li>
             {% empty %}
                 <li>No verses yet.</li>
             {% endfor %}

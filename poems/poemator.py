@@ -1,40 +1,28 @@
 # imports
 import random
 import string
-import datetime
-from typing import Tuple, List, Optional, Dict
-from os import path, mkdir
-
 from poems.analyse_verses import Syllabifier
 from poems.help_funcs import last_word_finder, decapitalize, assonant_rhyme_finder
 from poems.online_rhymer import Rhymer, getting_word_type, find_first_letter
 from poems.models import fetch_verses, fetch_rhyme, Verse
 
 
-punct = string.punctuation + " ¡¿"
-vowels = "aeiouáéíóúÁÉÍÓÚAEIOU"
-
-
 class PoemAutomator:
     """Types of lines: beginnings (com), intermediate (int), endings (fin) to iterate through"""
     TYPES_VERSES = ["beg", "int", "end"]
 
-    def __init__(self, num_ver: int, long_ver: List, rhy_sequence: str) -> None:
-        """User-defined variables
-        num_verses -> INT -> 7. Number of verses in the final poem
-        long_verses -> INT -> 8. Possibility RANGES in the FUTURE: 5-7 (5<=long<=7)
-        rhy_seq -> STR -> "ABAB BABA" -> Each character is a RHYME_CODE. Space = emptyline"""
+    def __init__(self, **kwargs):
+        self.num_verses = kwargs.get("verse_num")
+        # TODO --> range #if len(long_ver) == 1: #  self.long_verses = long_ver[0]#else:#  self.long_verses = long_ver
+        if "verse_length" in kwargs:
+            self.long_verses = kwargs.get("verse_length")
+        if "rhy_seq" in kwargs:
+            self.rhy_seq = kwargs.get("rhy_seq")
 
-        self.num_verses = num_ver
-
-        if len(long_ver) == 1:
-            self.long_verses = long_ver[0]
-        else:
-            self.long_verses = long_ver
-        self.rhy_seq = rhy_sequence
+        # TODO -> POPULATE THE SELF DECIDED RHYMES FROM THE BEGINNING
         self.verses_to_use, self.rhymes_to_use, self.words_used = self.populate_dicts()
 
-    def populate_dicts(self) -> Tuple[Dict, Dict, Dict]:
+    def populate_dicts(self):
         """verses_to_use -> DICT -> {RHYME_CODE: TUPLE(verse, last_word, beg, int, end)} from DB
            rhymes_to_use -> DICT -> {RHYME_CODE: str} -> Example: {A: "ado", B: "es"}
            words_used -> DICT -> {RHYME_CODE: LIST[last_word, last_word], RHYME_CODE: LIST[last_word, etc]}"""
@@ -51,7 +39,7 @@ class PoemAutomator:
 
         return verses_to_use, rhymes_to_use, words_used
 
-    def user_determined_rhymes(self) -> None:
+    def user_determined_rhymes(self):
         """Populates the rhymes_to_use dict if the user wants to decide the rhyme-endings beforehand"""
         for key in self.rhymes_to_use.keys():
             if key == key.upper():
@@ -125,7 +113,7 @@ class PoemAutomator:
                                                            asson_rhy=asson_rhyme,
                                                            unique=True)
 
-    def random_rhymes(self) -> None:
+    def random_rhymes(self):
         for key in self.rhymes_to_use.keys():
             cons = True if key == key.upper() else False
             limit = self.rhy_seq.count(key) + (self.rhy_seq.count(key) / 2)
@@ -146,7 +134,7 @@ class PoemAutomator:
             self.rhymes_to_use[key] = rhyme_to_use
             self.verses_to_use[key] = verses_to_use
 
-    def poem_generator(self) -> str:
+    def poem_generator(self):
         poem = []
 
         for i, rhyme_code in enumerate(self.rhy_seq):
@@ -162,7 +150,7 @@ class PoemAutomator:
 
         return "\t" + "\n\t".join(poem)
 
-    def select_verse_with_rhyme(self, rhyme_code: str, type_verse: int) -> str:
+    def select_verse_with_rhyme(self, rhyme_code, type_verse):
         verses = [verse for verse in self.verses_to_use[rhyme_code] if verse[type_verse]]
 
         try:
@@ -181,7 +169,8 @@ class PoemAutomator:
                 return verse_text
 
             except IndexError:
-                type_verse_kw = {"is_beg": True} if type_verse == 0 else {"is_int": True} if type_verse == 1 else {"is_end": True}
+                type_verse_kw = {"is_beg": True} if type_verse == 0 else {"is_int": True} if type_verse == 1 else {
+                    "is_end": True}
                 rhyme_to_use_now = fetch_rhyme(self.long_verses, limit=10)
                 verses = fetch_verses(verse_length=self.long_verses,
                                       cons_rhy=rhyme_to_use_now,
@@ -221,11 +210,11 @@ class PoemAutomator:
         verse_text = verse[3]
         return verse_text
 
-    def delete_verse_from_verses_to_use(self, rhyme_code: str, verse: Verse) -> None:
+    def delete_verse_from_verses_to_use(self, rhyme_code, verse):
         verse_index = self.verses_to_use[rhyme_code].index(verse)
         del self.verses_to_use[rhyme_code][verse_index]
 
-    def type_determiner(self, poem: List[str]) -> int:
+    def type_determiner(self, poem):
         """Returns 0, 1 or 2 depending on which kind of verse we need at each moment. The number stands for the index
         of 'beg', 'int' and 'end' in self.verses_to_use. Tuple(verse, last_word, beg, int, end)"""
 
@@ -242,12 +231,7 @@ class PoemAutomator:
             return 1
 
 
-def online_rhyme_finder(word: str,
-                        rhyme_type: str,
-                        syllables: int,
-                        first_letter: Optional[str] = None,
-                        word_type: Optional[str] = None,
-                        words_used: Optional[List] = None) -> str:
+def online_rhyme_finder(word, rhyme_type, syllables, first_letter=None, word_type=None, words_used=None):
     rhymes_object = Rhymer(word, rhyme_type, syllables, first_letter, word_type, words_used)
     rhymes_list = rhymes_object.getting_cronopista()
 
@@ -258,7 +242,7 @@ def online_rhyme_finder(word: str,
         print("Yo que sé, joder")
 
 
-def change_type(type_verse: int) -> int:
+def change_type(type_verse):
     """Possible solutions:
     1. Convert other kinds of lines into the one whe needs (com -> int, com -> fin etc.)
     3. Try RegEx for different but similar rhymes -> another script!
@@ -273,7 +257,7 @@ def change_type(type_verse: int) -> int:
     return new_type
 
 
-def changes_after_type_change(verse: str, old_type: int, new_type: int) -> str:
+def changes_after_type_change(verse, old_type, new_type):
     if new_type == 0:
         # new 'beg' -> old 'int'
         return decapitalize(verse, strict=False)
@@ -286,91 +270,5 @@ def changes_after_type_change(verse: str, old_type: int, new_type: int) -> str:
     return verse.rstrip(string.punctuation) + "."
 
 
-def save_poem(poem: str) -> None:
-    abs_path = path.dirname(__file__)
-    rel_path = "poemas/"
-    _path = path.join(abs_path, rel_path)
-    if not path.exists(_path):
-        mkdir(_path)
-
-    poem_name = input("\nWould you like to give the poem a name? (Leave blank otherwise): ")
-    if poem_name:
-        file_name = f"{_path}{poem_name}.txt"
-        with open(file_name, "w") as f:
-            print(poem, file=f)
-
-    else:
-        now = datetime.datetime.now()
-        file_name = f"{_path}poema{now.strftime('%H:%M:%S_%d-%m-%Y')}.txt"
-        with open(file_name, "w") as f:
-            print(poem, file=f)
-
-    print(f"[+] Saved poem at path {file_name}")
-
-
-def getting_inputs() -> Tuple[int, List, str]:
-    number_verses = input("Número de versos: ")
-    while not number_verses.isdigit():
-        number_verses = input(
-            "La variable number_verses solo puede contener valores numéricos: "
-        )
-
-    number_verses = int(number_verses)
-
-    while True:
-        size_verses = input(
-            "Longitud de los versos en sílabas (O intervalo: 7-9 para versos de 7 a 9 sílabas): "
-        ).strip(" -").split("-")
-
-        while not all(elem.isdigit() for elem in size_verses):
-            size_verses = input("""La variable size_verses solo puede contener valores numéricos 
-                                   o el guión que separa los márgenes de un intervalo: """).strip(" -").split("-")
-
-        size_verses = [int(digit) for digit in size_verses]
-
-        if len(size_verses) == 2:
-            if not 3 < size_verses[0] and size_verses[1] < 17:
-                print("La longitud de los versos ha de ser entre 4 y 16 sílabas.")
-                continue
-            break
-
-        elif len(size_verses) == 1:
-            if not 3 < size_verses[0] < 17:
-                print("La longitud de los versos ha de ser entre 4 y 16 sílabas.")
-                continue
-            break
-
-    rhyme_sequence = input("Secuencia de rimas (p.ej ABBA): ")
-    while int(number_verses) != len([seq for seq in rhyme_sequence if seq != " "]):
-        rhyme_sequence = input(
-            "Secuencia de rimas (Debe ser igual de larga que el número de versos explicitado anteriormente): "
-        )
-
-    return number_verses, size_verses, rhyme_sequence
-
-
-def create_poem() -> None:
-    num_ver, long_ver, rhy_seq = getting_inputs()
-
-    poem = PoemAutomator(num_ver, long_ver, rhy_seq)
-
-    self_decide = input("Quieres elegir las rimas? [Y/N]: ")
-    if self_decide.strip().upper() == "Y":
-        poem.user_determined_rhymes()
-    else:
-        poem.random_rhymes()
-
-    generated_poem = poem.poem_generator()
-    print(generated_poem)
-
-    save = input("\nWould you like to save this poem? [Y/N]")
-    if save.upper() == "Y":
-        save_poem(generated_poem)
-
-
 if __name__ == "__main__":
-    create_poem()
-
-    another = input("Would you like to create another poem? [Y/N]")
-    if another.upper() == "Y":
-        create_poem()
+    pass

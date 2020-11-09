@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView, ListView
 from .models import Verse
+from .poemator import PoemAutomator
 
 
 # Create your views here.
@@ -13,29 +14,33 @@ class VerseView(ListView):
 
     def get_queryset(self):
         arguments = {}
-        if self.request.GET.get('verse_length'):
-            length_val = self.request.GET.get('verse_length')
-            arguments['verse_length'] = length_val
-        if self.request.GET.get('cons_rhy'):
-            cons_val = self.request.GET.get('cons_rhy')
-            arguments["cons_rhy"] = cons_val
-        if self.request.GET.get('asson_rhy'):
-            asson_val = self.request.GET.get('asson_rhy')
-            arguments["asson_rhy"] = asson_val
-        if self.request.GET.get('last_word'):
-            last_word_val = self.request.GET.get('last_word')
-            arguments["last_word"] = last_word_val
-        if self.request.GET.get('verse_type'):
-            verse_type_val = self.request.GET.get('verse_type')
-            if verse_type_val == "is_beg":
-                arguments["is_beg"] = True
-            elif verse_type_val == "is_int":
-                arguments["is_int"] = True
-            else:
-                arguments["is_end"] = True
 
-        new_context = Verse.objects.filter(**arguments)
-        return new_context
+        left_keys = dict(self.request.GET)
+
+        if self.request.GET.get('verse_num'):
+            num_ver = self.request.GET.get('verse_num')
+            arguments['verse_num'] = num_ver
+            del left_keys['verse_num']
+
+        if self.request.GET.get('verse_length'):
+            lon_ver = self.request.GET.get('verse_length')
+            arguments["verse_length"] = lon_ver
+            del left_keys['verse_length']
+
+        if self.request.GET.get('rhy_seq'):
+            rhy_seq = self.request.GET.get('rhy_seq')
+            arguments["rhy_seq"] = rhy_seq
+            del left_keys['rhy_seq']
+
+        if self.request.GET.get('select_verses') == "yes":
+            del left_keys['select_verses']
+
+            for key in left_keys.keys():
+                value = self.request.GET.get(key)
+                arguments[key] = value
+
+        list_of_verses = PoemAutomator(**arguments)
+        return list_of_verses
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
