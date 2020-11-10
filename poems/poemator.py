@@ -23,7 +23,7 @@ class PoemAutomator:
 
         if select_verses:
             for key in self.rhymes_to_use.keys():
-                self.rhymes_to_use[key] = kwargs.get[key]
+                self.rhymes_to_use[key] = kwargs.get(key)
 
     def populate_dicts(self):
         """verses_to_use -> DICT -> {RHYME_CODE: TUPLE(verse, last_word, beg, int, end)} from DB

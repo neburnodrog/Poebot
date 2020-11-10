@@ -42,7 +42,15 @@ class VerseView(ListView):
                 value = self.request.GET.get(key)
                 arguments[key] = value
 
-        list_of_verses = PoemAutomator(**arguments)
+            automator = PoemAutomator(**arguments)
+            automator.user_determined_rhymes()
+            list_of_verses = automator.poem_generator()
+
+        else:
+            automator = PoemAutomator(**arguments)
+            automator.random_rhymes()
+            list_of_verses = automator.poem_generator()
+
         return list_of_verses
 
     def get_context_data(self, **kwargs):

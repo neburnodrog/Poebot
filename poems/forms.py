@@ -14,12 +14,10 @@ class CreatePoemForm(forms.Form):
 
     rhy_seq = forms.CharField(help_text="Aquí la secuencia de las rimas. Letras mayúsculas implican rima consonante, minúsculas asonante.",
                               label="Secuencia de rimas",
-                              required=False,
-                              widget=forms.TextInput(attrs={"id": "rhy_seq"}))
+                              required=False)
 
     select_verses = forms.ChoiceField(label="Quieres elegir las rimas? ",
-                                      choices=[('no', 'No'), ('yes', 'Sí')],
-                                      widget=forms.Select(attrs={"id": "select_verses"}))
+                                      choices=[('no', 'No'), ('yes', 'Sí')])
 
     def __init__(self, *args, **kwargs):
         super(CreatePoemForm, self).__init__(*args, **kwargs)
