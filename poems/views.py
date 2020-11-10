@@ -1,11 +1,13 @@
-from django.views.generic import TemplateView, ListView
+from django.views.generic import ListView, FormView
+from .forms import CreatePoemForm
 from .models import Verse
 from .poemator import PoemAutomator
 
 
 # Create your views here.
-class IndexView(TemplateView):
-    template_name = "poems/index.html"
+class IndexView(FormView):
+    template_name = "poems/create-poem.html"
+    form_class = CreatePoemForm
 
 
 class VerseView(ListView):
@@ -33,6 +35,7 @@ class VerseView(ListView):
             del left_keys['rhy_seq']
 
         if self.request.GET.get('select_verses') == "yes":
+            arguments["select_verses"] = True
             del left_keys['select_verses']
 
             for key in left_keys.keys():

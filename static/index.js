@@ -28,7 +28,7 @@ $('#select_verses').on("change", function(){
       for (i = 0; i < rhy_list.length; i++) {
          $el.append($("<label>").attr("for", rhy_list[i]).text(`Rima ${rhy_list[i]}:`));
          $el.append($("<br>"));
-         $el.append($("<input type='text'>").attr("id", rhy_list[i]).attr("name", `rhy_${rhy_list[i]}`));
+         $el.append($("<input type='text'>").attr("name", rhy_list[i]).attr("id", rhy_list[i]));
          $el.append($("<br>"));
       };
 

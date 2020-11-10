@@ -11,7 +11,7 @@ class PoemAutomator:
     """Types of lines: beginnings (com), intermediate (int), endings (fin) to iterate through"""
     TYPES_VERSES = ["beg", "int", "end"]
 
-    def __init__(self, **kwargs):
+    def __init__(self, select_verses=False, **kwargs):
         self.num_verses = kwargs.get("verse_num")
         # TODO --> range #if len(long_ver) == 1: #  self.long_verses = long_ver[0]#else:#  self.long_verses = long_ver
         if "verse_length" in kwargs:
@@ -19,8 +19,11 @@ class PoemAutomator:
         if "rhy_seq" in kwargs:
             self.rhy_seq = kwargs.get("rhy_seq")
 
-        # TODO -> POPULATE THE SELF DECIDED RHYMES FROM THE BEGINNING
         self.verses_to_use, self.rhymes_to_use, self.words_used = self.populate_dicts()
+
+        if select_verses:
+            for key in self.rhymes_to_use.keys():
+                self.rhymes_to_use[key] = kwargs.get[key]
 
     def populate_dicts(self):
         """verses_to_use -> DICT -> {RHYME_CODE: TUPLE(verse, last_word, beg, int, end)} from DB

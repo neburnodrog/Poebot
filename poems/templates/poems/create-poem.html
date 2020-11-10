@@ -1,0 +1,27 @@
+{% extends 'poems/base.html' %}
+
+{% block title %}Create Poem{% endblock %}
+
+{% block content %}
+<form action="{% url 'poems:poem' %}" method="get">
+
+    {% for field in form %}
+        <div class="form-group">
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+            {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+            {% endif %}
+        </div><br>
+    {% endfor %}
+
+    <div id="hidden" style="display:none;"><br>
+      <fieldset class="form-group" id="hidden_fieldset">
+        <legend>Especifica las rimas:</legend>
+      </fieldset>
+    </div>
+
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}
