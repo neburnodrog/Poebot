@@ -17,9 +17,13 @@ class CreatePoemForm(forms.Form):
                               required=False)
 
     select_verses = forms.ChoiceField(label="Quieres elegir las rimas? ",
-                                      choices=[('no', 'No'), ('yes', 'Sí')])
+                                      choices=[('no', 'No'), ('yes', 'Sí')],
+                                      required=False)
 
     def __init__(self, *args, **kwargs):
         super(CreatePoemForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
+            if visible.name == "select_verses":
+                visible.field.widget.attrs['style'] = 'display:none;'
+
