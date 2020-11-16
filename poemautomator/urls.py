@@ -19,7 +19,6 @@ from django.http import HttpResponseRedirect
 
 
 urlpatterns = [
-    path("", lambda r: HttpResponseRedirect('index/')),
-    path("index/", include("poems.urls")),
+    path("", include("poems.urls")),
     path('admin/', admin.site.urls),
 ]

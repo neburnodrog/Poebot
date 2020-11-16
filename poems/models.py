@@ -12,7 +12,13 @@ class Verse(models.Model):
     is_int = models.BooleanField()
     is_end = models.BooleanField()
 
+    def __str__(self):
+        return self.verse_text
 
+    def __repr__(self):
+        return 
+
+#  No MODELS from here on
 def fetch_verses(**kwargs):
     """Retrieves a filtered list of verses from the DB"""
     if "unique" in kwargs and kwargs["unique"]:

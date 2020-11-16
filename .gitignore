@@ -65,3 +65,11 @@ venv.bak/
 
 # mypy 
 .mypy_cache/ 
+
+# coverage
+.coveragerc
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover

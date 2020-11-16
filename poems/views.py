@@ -1,28 +1,69 @@
 from django.views.generic import ListView, FormView
+from django.http import JsonResponse, HttpResponseRedirect
 from .forms import CreatePoemForm
 from .models import Verse
 from .poemator import PoemAutomator
+from django.shortcuts import render
+from urllib.parse import urlencode
+from django.urls import reverse_lazy
+
+
+def home_view(request):
+    return render(request, "poems/home.html")
 
 
 # Create your views here.
-class IndexView(FormView):
+class CreatePoemView(FormView):
     template_name = "poems/create-poem.html"
     form_class = CreatePoemForm
 
+    def get(self, *args, **kwargs):
+        super().get(*args, **kwargs)
+        if 'submit' in self.request.GET:
+            form = CreatePoemForm(self.request.GET)
+            if form.is_valid():
+                query_string = urlencode(form.data, ascii)
+                return HttpResponseRedirect(reverse_lazy("poems:poem") + "?" + query_string)
+            return self.form_invalid(form)
 
-class VerseView(ListView):
+        return render(self.request, self.get_template_names() , context=self.get_context_data())
+
+
+def validate_rhyme(request):
+    ver_len_value = request.GET.get("verse_length")
+    rhy_seq = request.GET.get("rhy_seq")
+
+    for key in request.GET:
+        if key != "verse_length" and key != "rhy_seq":
+            rhyme_value = request.GET.get(key)
+
+            if key == key.upper():  # Key is UPPERCASE -> consonant_rhyme checker
+                filtered_verses = Verse.objects.filter(cons_rhy__iexact=rhyme_value, verse_length=ver_len_value)
+
+            else:  # Key is LOWERCASE -> assonant_rhyme checker
+                filtered_verses = Verse.objects.filter(asson_rhy__iexact=rhyme_value, verse_length=ver_len_value)
+
+            data = {
+                "not_valid": len(filtered_verses) < 2 * rhy_seq.count(key)  # TODO -> Check if we can lower the value
+            }
+
+            if data["not_valid"]:
+                data["error_message"] = "No hay rimas suficientes de este tipo en la base de datos para continuar.\n"
+
+    return JsonResponse(data)
+
+
+class PoemView(ListView):
     template_name = "poems/poem.html"
-    paginate_by = 50
 
     def get_queryset(self):
         arguments = {}
 
         left_keys = dict(self.request.GET)
 
-        if self.request.GET.get('verse_num'):
-            num_ver = self.request.GET.get('verse_num')
-            arguments['verse_num'] = num_ver
-            del left_keys['verse_num']
+        ver_num = self.request.GET.get('ver_num')  # required
+        arguments['ver_num'] = ver_num
+        del left_keys['ver_num']
 
         if self.request.GET.get('verse_length'):
             lon_ver = self.request.GET.get('verse_length')
@@ -59,6 +100,5 @@ class VerseView(ListView):
         context['cons_rhy'] = self.request.GET.get('cons_rhy', "")
         context['asson_rhy'] = self.request.GET.get('asson_rhy', "")
         context['last_word'] = self.request.GET.get('last_word', "")
-        context['verse_type'] = self.request.GET.get('verse_type', False)
 
         return context

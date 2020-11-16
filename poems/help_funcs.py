@@ -235,3 +235,9 @@ def delete_captures_within_matches(verse: str, rgx_patterns: List) -> str:
             verse = verse.replace(string_match, replacement)
 
     return verse
+
+
+def sequence_without_spaces(str_sequence: str) -> str:
+    list_sequence_sorted = sorted(list(str_sequence))
+    str_trimmed = "".join(list_sequence_sorted).strip()
+    return str_trimmed

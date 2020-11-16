@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
+from django.http import HttpResponse
 
 
 app_name = 'poems'
 
 urlpatterns = [
-    path("", views.IndexView.as_view(), name="index"),
-    path("poem/", views.VerseView.as_view(), name="poem"),
+    path("", views.home_view),
+    path("create-poem/", views.CreatePoemView.as_view(), name="create_poem"),
+    path("poem/", views.PoemView.as_view(), name="poem"),
+    path("validate/", views.validate_rhyme, name="validate_rhyme"),
 ]

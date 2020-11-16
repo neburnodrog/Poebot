@@ -1,0 +1,12 @@
+{% extends 'poems/poems_base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<h1>Welcome {{ user }}</h1>
+
+<a href="{% url 'poems:create_poem' %}"><button type="button" class="btn btn-primary">Click here to generate a poem</button></a>
+
+{% endblock %}
