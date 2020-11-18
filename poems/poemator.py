@@ -1,239 +1,173 @@
-# imports
 import random
 import string
+from typing import List, Dict
+
+from django.db.models import Count, Q
+
 from poems.analyse_verses import Syllabifier
-from poems.help_funcs import last_word_finder, decapitalize, assonant_rhyme_finder
+from poems.help_funcs import last_word_finder, decapitalize
 from poems.online_rhymer import Rhymer, getting_word_type, find_first_letter
-from poems.models import fetch_verses, fetch_rhyme, Verse
+from poems.models import Verse, AssonantRhyme, ConsonantRhyme
 
 
 class PoemAutomator:
     """Types of lines: beginnings (com), intermediate (int), endings (fin) to iterate through"""
-    TYPES_VERSES = ["beg", "int", "end"]
+    VERSE_TYPES = ["is_beg", "is_int", "is_end"]
 
-    def __init__(self, ver_num, verse_length=False, rhy_seq=False, select_verses=False, **kwargs):
+    def __init__(self, ver_num, **kwargs):
         self.ver_num = ver_num
         # TODO --> range #if len(long_ver) == 1: #  self.verse_length = long_ver[0]#else:#  self.verse_length = long_ver
-        self.verse_length = verse_length
-        self.rhy_seq = rhy_seq
+        self.verse_length = kwargs.get("verse_length")
+        self.rhy_seq = kwargs.get("rhy_seq")
 
-        self.verses_to_use, self.rhymes_to_use, self.words_used = self.populate_dicts()
+        self.verses_available, self.rhymes_to_use, self.words_used = self.populate_dicts()
 
-        if select_verses:
+        if kwargs.get("select_verses"):
             for key in self.rhymes_to_use.keys():
                 self.rhymes_to_use[key] = kwargs.get(key)
 
     def populate_dicts(self):
-        """verses_to_use -> DICT -> {RHYME_CODE: TUPLE(verse, last_word, beg, int, end)} from DB
-           rhymes_to_use -> DICT -> {RHYME_CODE: str} -> Example: {A: "ado", B: "es"}
-           words_used -> DICT -> {RHYME_CODE: LIST[last_word, last_word], RHYME_CODE: LIST[last_word, etc]}"""
+        """verses_available -> DICT -> {RHYME_CODE: models.Verse-QuerySet}
+           rhymes_to_use -> DICT -> {RHYME_CODE: str|RhymeObjects} -> Example: {A: "ado", B: "es"}
+           words_used -> DICT -> {RHYME_CODE: List[last_word, last_word], RHYME_CODE: List[last_word, etc]}"""
 
-        verses_to_use = {}
+        verses_available = {}
         rhymes_to_use = {}
-        words_used = {}
+        words_used = []
 
         for rhyme_code in self.rhy_seq:
             if rhyme_code != " ":
-                verses_to_use[rhyme_code] = []
+                verses_available[rhyme_code] = []
                 rhymes_to_use[rhyme_code] = ""
-                words_used[rhyme_code] = []
 
-        return verses_to_use, rhymes_to_use, words_used
+        return verses_available, rhymes_to_use, words_used
 
     def user_determined_rhymes(self):
-        """Populates the rhymes_to_use dict if the user wants to decide the rhyme-endings beforehand"""
-        for key in self.rhymes_to_use.keys(): # TODO -> MEQUEDAO AQUI JODER
-            if key == key.upper():
-                # Uppercase letters correspond to consonant rhymes
-
-                if not self.rhymes_to_use[key.lower()]:
-                    self.rhymes_to_use[key] = input(f"Rima consonante {key}: -")
-
-                    verses_to_use = fetch_verses(verse_length=self.verse_length,
-                                                 cons_rhy=self.rhymes_to_use[key],
-                                                 unique=True)
-
-                    while not verses_to_use:
-                        self.rhymes_to_use[key] = input(
-                            f"La rima consonante que has especificado no existe en la base de datos. Prueba de nuevo: ")
-
-                        verses_to_use = fetch_verses(verse_length=self.verse_length,
-                                                     cons_rhy=self.rhymes_to_use[key],
-                                                     unique=True)
-
-                    self.verses_to_use[key] = verses_to_use
-
-                else:
-                    #  Here the consonant rhyme must be a subset of the assonant rhyme: abba ABBA -> A ⊆ a, B ⊆ b, etc
-
-                    self.rhymes_to_use[key] = input(
-                        f"Rima consonante {key} (ha de rimar asonantemente con -> {key.lower()}): -"
-                    )
-
-                    while not Syllabifier(self.rhymes_to_use[key]).assonant_rhyme == self.rhymes_to_use[key.lower()]:
-                        self.rhymes_to_use[key] = input(
-                            f"Rima consonante {key} (HA DE RIMAR ASONANTEMENTE CON -> {key.lower()}): -"
-                        )
-
-                    verses_to_use = fetch_verses(verse_length=self.verse_length,
-                                                 cons_rhy=self.rhymes_to_use[key],
-                                                 unique=True)
-
-                    self.verses_to_use[key] = verses_to_use
-
-            else:
-                #  lowercase letter corresponds to assonant rhymes
-
-                if not self.rhymes_to_use[key.upper()]:
-                    #  There is no corresponding consonant rhyme to the given assonant one.
-
-                    self.rhymes_to_use[key] = input(f"Rima asonante {key}: -")
-
-                    verses_to_use = fetch_verses(verse_length=self.verse_length,
-                                                 asson_rhy=self.rhymes_to_use[key],
-                                                 unique=True)
-                    while not verses_to_use:
-                        self.rhymes_to_use[key] = input(
-                            f"La rima asonante que has especificado no existe en la base de datos. Prueba de nuevo: ")
-
-                        verses_to_use = fetch_verses(verse_length=self.verse_length,
-                                                     asson_rhy=self.rhymes_to_use[key],
-                                                     unique=True)
-
-                    self.verses_to_use[key] = verses_to_use
-
-                else:
-                    #  Assonant rhyme that corresponds to a certain consonant one. A -> a, B -> b, etc
-
-                    cons_rhyme = self.rhymes_to_use[key.upper()]
-                    asson_rhyme = assonant_rhyme_finder(cons_rhyme)
-
-                    self.rhymes_to_use[key] = asson_rhyme
-
-                    self.verses_to_use[key] = fetch_verses(verse_length=self.verse_length,
-                                                           asson_rhy=asson_rhyme,
-                                                           unique=True)
-
-    def random_rhymes(self):
+        """If user chose concrete rhymes: turn string-representation of rhyme into Consonant/Assonant (Rhyme)Objects"""
         for key in self.rhymes_to_use.keys():
-            cons = True if key == key.upper() else False
-            limit = self.rhy_seq.count(key) + (self.rhy_seq.count(key) / 2)
-            rhyme_to_use = fetch_rhyme(self.verse_length, limit=limit, cons=cons)
+            rhyme = self.rhymes_to_use[key]
 
-            if cons:
-                verses_to_use = fetch_verses(verse_length=self.verse_length, cons_rhy=rhyme_to_use, unique=True)
+            if key == key.upper():  # Uppercase letters correspond to consonant rhymes
+                rhyme_object = ConsonantRhyme.objects.get(consonant_rhyme=rhyme)
+
+            else:  # Lowercase letters correspond to assonant rhymes
+                rhyme_object = AssonantRhyme.objects.get(assonant_rhyme=rhyme)
+
+            self.rhymes_to_use[key] = rhyme_object
+
+        self.determine_verse_set()
+
+    def determine_rhymes(self):
+        """If user didn't select any concrete rhymes -> choose a random ones"""
+        for key in self.rhymes_to_use.keys():
+            limit = self.rhy_seq.count(key) * 2
+
+            if key == key.upper():
+                rhyme_candidates = ConsonantRhyme.objects.filter(verse_number__mt=limit)
+
             else:
-                verses_to_use = fetch_verses(verse_length=self.verse_length, asson_rhy=rhyme_to_use, unique=True)
+                rhyme_candidates = AssonantRhyme.objects.filter(verse_number__mt=limit)
 
-            while len(verses_to_use) < self.rhy_seq.count(key):
-                rhyme_to_use = fetch_rhyme(self.verse_length, limit=self.rhy_seq.count(key), cons=cons)
-                if cons:
-                    verses_to_use = fetch_verses(verse_length=self.verse_length, cons_rhy=rhyme_to_use, unique=True)
-                else:
-                    verses_to_use = fetch_verses(verse_length=self.verse_length, asson_rhy=rhyme_to_use, unique=True)
-
+            rhyme_to_use = random.choice(rhyme_candidates)
             self.rhymes_to_use[key] = rhyme_to_use
-            self.verses_to_use[key] = verses_to_use
+
+        self.determine_verse_set()
+
+    def determine_verse_set(self):
+        """Populates the self.verses_available dict with a QuerySet of models.Verse objects"""
+        for key in self.rhymes_to_use.keys():
+
+            rhyme = self.rhymes_to_use[key]
+
+            if key == key.upper():  # Uppercase letters correspond to consonant rhymes
+                rhyme_object = ConsonantRhyme.objects.get(consonant_rhyme=rhyme)
+
+            else:  # Lowercase letters correspond to assonant rhymes
+                rhyme_object = AssonantRhyme.objects.get(assonant_rhyme=rhyme)
+
+            verses_to_use = rhyme_object.verse_set.all().filter(verse_length=self.verse_length)
+            self.verses_available[key] = verses_to_use
 
     def poem_generator(self):
-        poem = []
+        poem = []  # List of verses
 
-        for i, rhyme_code in enumerate(self.rhy_seq):
+        empty_lines_indexes = []  # Array to store the location of the empty verses.
+        rhy_seq_list = list(self.rhy_seq)
+        for i, rhyme_code in enumerate(rhy_seq_list):
             if rhyme_code == " ":
-                poem[-1] = poem[-1] + "\n"
-                continue
+                empty_lines_indexes.append(i)
 
-            else:
-                type_verse = self.type_determiner(poem)
-                verse = self.select_verse_with_rhyme(rhyme_code, type_verse)
+        rhy_seq = "".join(self.rhy_seq.split())  # Array without the empty characters.
 
+        for i, rhyme_code in enumerate(rhy_seq):
+            verse_type = self.type_determiner(poem)
+            verse = self.select_verse_with_rhyme(rhyme_code, verse_type)
             poem.append(verse)
 
-        return "\t" + "\n\t".join(poem)
+        # inserting the stored empty verses
+        for i in empty_lines_indexes:
+            poem.insert(i, "")
 
-    def select_verse_with_rhyme(self, rhyme_code, type_verse):
-        verses = [verse for verse in self.verses_to_use[rhyme_code] if verse[type_verse]]
+        return poem
 
-        try:
-            verse = random.choice(verses)
+    def select_verse_with_rhyme(self, rhyme_code, verse_types):
+        verses = self.verses_available[rhyme_code]
 
-        except IndexError:
-            new_type = change_type(type_verse)
-            verses = [verse for verse in self.verses_to_use[rhyme_code] if verse[new_type]]
+        verses_w_type = verses.filter(**verse_types)
 
-            try:
-                verse = random.choice(verses)
-                self.delete_verse_from_verses_to_use(rhyme_code, verse)
+        if verses_w_type:
+            verse = random.choice(verses_w_type)
 
-                verse_text = changes_after_type_change(verse[3], type_verse, new_type)
-                self.words_used[rhyme_code].append(verse[4])
-                return verse_text
-
-            except IndexError:
-                type_verse_kw = {"is_beg": True} if type_verse == 0 else {"is_int": True} if type_verse == 1 else {
-                    "is_end": True}
-                rhyme_to_use_now = fetch_rhyme(self.verse_length, limit=10)
-                verses = fetch_verses(verse_length=self.verse_length,
-                                      cons_rhy=rhyme_to_use_now,
-                                      **type_verse_kw)
-
-                verse = random.choice(verses)  # This Verse is a random verse with anther rhyme.
-
-                word_to_rhyme_with = random.choice(self.words_used[rhyme_code])
-                rhy_type = "c" if rhyme_code.upper() == rhyme_code else "a"
-                num_syll = Syllabifier(verse.last_word).syllables
-                last_word_type = getting_word_type(verse.last_word)
-                first_letter = find_first_letter(verse.last_word)
-
-                words_used = []
-                for word_list in self.words_used.values():
-                    for word in word_list:
-                        words_used.append(word)
-
-                new_word = online_rhyme_finder(word_to_rhyme_with,
-                                               rhy_type,
-                                               num_syll,
-                                               first_letter,
-                                               last_word_type,
-                                               words_used)
-
-                verse_last_word = last_word_finder(verse[3])
-                verse_text = verse[3].replace(verse_last_word, new_word)
-
-                self.words_used[rhyme_code].append(new_word)
-
-                return verse_text
-
-        self.delete_verse_from_verses_to_use(rhyme_code, verse)
-
-        #  Add last_word to self.words_used and return the verse to poem_random_generator
-        self.words_used[rhyme_code].append(verse[4])
-        verse_text = verse[3]
-        return verse_text
-
-    def delete_verse_from_verses_to_use(self, rhyme_code, verse):
-        verse_index = self.verses_to_use[rhyme_code].index(verse)
-        del self.verses_to_use[rhyme_code][verse_index]
-
-    def type_determiner(self, poem):
-        """Returns 0, 1 or 2 depending on which kind of verse we need at each moment. The number stands for the index
-        of 'beg', 'int' and 'end' in self.verses_to_use. Tuple(verse, last_word, beg, int, end)"""
-
-        if len(poem) == 0:
-            return 0
-
-        elif len(poem) == self.ver_num - 1:
-            return 2
-
-        elif poem[-1].endswith("."):
-            return 0
+            self.words_used.append(verse.last_word)
+            self.verses_available[rhyme_code] = verses.filter().exclude(last_word=verse.last_word)
+            return verse
 
         else:
-            return 1
+            """Choose a different verse object and change its final word for one that matches our current rhyme"""
+            verses_to_choose_from = Verse.objects.filter(verse_length=self.verse_length, **verse_types)
+            verse_to_use = random.choice(verses_to_choose_from)
+
+            word_to_rhyme_with = random.choice(self.rhymes_to_use[rhyme_code].verse_set.all()).last_word
+            rhy_type = "c" if rhyme_code.upper() == rhyme_code else "a"
+
+            word_to_change = verse_to_use.last_word
+            num_syll_word_to_change = Syllabifier(word_to_change).syllables
+            word_to_change_type = getting_word_type(word_to_change)
+            first_letter = find_first_letter(word_to_change)
+
+            new_word = online_rhyme_finder(word=word_to_rhyme_with,
+                                           rhyme_type=rhy_type,
+                                           syllables=num_syll_word_to_change,
+                                           first_letter=first_letter,
+                                           word_type=word_to_change_type,
+                                           words_used=self.words_used)
+
+            #  Now change the new_word for the old one in verse_to_use
+            new_verse_text = verse_to_use.verse_text.replace(word_to_change, new_word)
+            new_verse_object = save_new_verse_object(new_verse_text)
+
+            self.words_used.append(new_word)
+            self.verses_available[rhyme_code] = verses.filter().exclude(last_word=new_word)
+
+            return new_verse_object
+
+    def type_determiner(self, poem: List) -> Dict:
+        """Returns a list of booleans. True or False representing [is_beg, is_int, is_end]"""
+
+        if len(poem) == 0 or poem[-1].endswith("."):
+            types_dict = {"is_beg": True, "is_int": False}
+
+        elif len(poem) == self.ver_num - 1:
+            types_dict = {"is_int": False, "is_end": True}
+
+        else:
+            types_dict = {"is_int": True}
+
+        return types_dict
 
 
-def online_rhyme_finder(word, rhyme_type, syllables, first_letter=None, word_type=None, words_used=None):
-    rhymes_object = Rhymer(word, rhyme_type, syllables, first_letter, word_type, words_used)
+def online_rhyme_finder(**kwargs):
+    rhymes_object = Rhymer(**kwargs)
     rhymes_list = rhymes_object.getting_cronopista()
 
     if rhymes_list:
@@ -243,32 +177,41 @@ def online_rhyme_finder(word, rhyme_type, syllables, first_letter=None, word_typ
         print("Yo que sé, joder")
 
 
-def change_type(type_verse):
+def change_type(verse_types):
     """Possible solutions:
     1. Convert other kinds of lines into the one whe needs (com -> int, com -> fin etc.)
     3. Try RegEx for different but similar rhymes -> another script!
     4. Another length of verse -> maybe here after the other fail."""
 
-    new_type = (type_verse + 1) % 2
-    """  self.TYPES_VERSES = ["beg", "int", "end"]   
-            'beg' -> 'int'
-            'int' -> 'beg'
-            'end' -> 'int'      """
+    #  For now return a new query
+    if verse_types.get("is_beg"):
+        query = Q(is_int=True)
+        query.add(Q(is_end=True), Q.OR)
+    elif verse_types.get("is_int"):
+        query = Q(is_beg=True)
+        query.add(Q(is_end=True), Q.OR)
+    else:
+        query = Q(is_int=True)
+        query.add(Q(is_beg=True), Q.OR)
 
-    return new_type
+    return query
 
 
-def changes_after_type_change(verse, old_type, new_type):
-    if new_type == 0:
-        # new 'beg' -> old 'int'
-        return decapitalize(verse, strict=False)
 
-    elif new_type == 1 and old_type == 0:
-        # new 'int' -> old 'beg'
-        return verse.capitalize()
 
-    # new 'int' -> old 'end'
-    return verse.rstrip(string.punctuation) + "."
+def save_new_verse_object(new_verse_text):
+    verse_analysed = Syllabifier(new_verse_text)
+    new_verse = Verse.objects.create(verse_text=verse_analysed.sentence,
+                                     verse_length=verse_analysed.syllables,
+                                     last_word=verse_analysed.last_word,
+                                     is_beg=verse_analysed.beg,
+                                     is_int=verse_analysed.int,
+                                     is_end=verse_analysed.end,
+                                     asson_rhy=AssonantRhyme.objects.get(assonant_rhyme=verse_analysed.assonant_rhyme),
+                                     cons_rhy=ConsonantRhyme.objects.get(consonant_rhyme=verse_analysed.consonant_rhyme))
+
+    new_verse.save()
+    return new_verse
 
 
 if __name__ == "__main__":

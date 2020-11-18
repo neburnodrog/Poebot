@@ -23,6 +23,10 @@
                     {% endif %}
               {% endif %}
 
+              {% if field.name == 'rhy_seq' %}
+              <div></div>
+              {% endif %}
+
           </div><br>
       {% endfor %}
 
@@ -31,7 +35,7 @@
         </fieldset>
       </div>
 
-      <input type="submit" name='submit' value="Submit">
+      <input id="create-poem" class="btn btn-primary" type="submit" name='submit' value="Generar poema" style="display:none;">
   </form>
 
 {% endblock %}

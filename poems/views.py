@@ -1,18 +1,21 @@
+import random
+from urllib.parse import urlencode
+
 from django.views.generic import ListView, FormView
 from django.http import JsonResponse, HttpResponseRedirect
-from .forms import CreatePoemForm
-from .models import Verse
-from .poemator import PoemAutomator
 from django.shortcuts import render
-from urllib.parse import urlencode
 from django.urls import reverse_lazy
+
+from .forms import CreatePoemForm
+from .models import Verse, AssonantRhyme, ConsonantRhyme
+from .poemator import PoemAutomator
+from .analyse_verses import Syllabifier
 
 
 def home_view(request):
     return render(request, "poems/home.html")
 
 
-# Create your views here.
 class CreatePoemView(FormView):
     template_name = "poems/create-poem.html"
     form_class = CreatePoemForm
@@ -37,11 +40,25 @@ def validate_rhyme(request):
         if key != "verse_length" and key != "rhy_seq":
             rhyme_value = request.GET.get(key)
 
+            if rhyme_value.startswith("-"):
+                rhyme_value = rhyme_value[1:]
+            else:
+                rhyme_value = Syllabifier(rhyme_value).assonant_rhyme
+
             if key == key.upper():  # Key is UPPERCASE -> consonant_rhyme checker
-                filtered_verses = Verse.objects.filter(cons_rhy__iexact=rhyme_value, verse_length=ver_len_value)
+                try:
+                    filtered_verses = Verse.objects.filter(cons_rhy=ConsonantRhyme.objects.get(consonant_rhyme=rhyme_value),
+                                                           verse_length=ver_len_value)
+                except ConsonantRhyme.DoesNotExist:
+                    filtered_verses = []
 
             else:  # Key is LOWERCASE -> assonant_rhyme checker
-                filtered_verses = Verse.objects.filter(asson_rhy__iexact=rhyme_value, verse_length=ver_len_value)
+                try:
+                    filtered_verses = Verse.objects.filter(asson_rhy=AssonantRhyme.objects.get(assonant_rhyme=rhyme_value),
+                                                           verse_length=ver_len_value)
+
+                except AssonantRhyme.DoesNotExist:
+                    filtered_verses = []
 
             data = {
                 "not_valid": len(filtered_verses) < 2 * rhy_seq.count(key)  # TODO -> Check if we can lower the value
@@ -84,7 +101,7 @@ class PoemView(ListView):
                 arguments[key] = value
 
             automator = PoemAutomator(**arguments)
-            automator.user_determined_rhymes()
+            automator.determine_verse_set()
             list_of_verses = automator.poem_generator()
 
         else:
