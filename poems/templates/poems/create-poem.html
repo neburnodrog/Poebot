@@ -1,16 +1,16 @@
 {% extends 'poems/poems_base.html' %}
 {% load static %}
-
 {% block title %}Create Poem{% endblock %}
 
-{% block content %}
-<form action="" method="get">
+{% block jumbo %}
+<div class="container">
+  <form action="" method="get">
 
+      <div class="row">
       {% for field in form %}
+        <div class="col-6">
           <div class="form-group">
-
               {{ field.label_tag }}{{ field }}
-
               {% if field.errors %}
                     {% for error in field.errors %}
                         <div class="invalid-feedback">
@@ -23,20 +23,40 @@
                     {% endif %}
               {% endif %}
 
-              {% if field.name == 'rhy_seq' %}
-              <div></div>
-              {% endif %}
-
-          </div><br>
+          </div>
+            <br>
+        </div>
       {% endfor %}
 
-      <div id="hidden" style="display:none;"><br>
-        <fieldset class="form-group" id="hidden_fieldset">
-        </fieldset>
+        <div class="col-6">
+          <div class="form-group">
+            <label for="id_select_verses" style="display:none;">Quieres elegir las rimas?</label>
+            <select class="form-control" id="id_select_verses" style="display:none;">
+              <option value="no">No</option>
+              <option value="yes">Sí</option>
+              <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->
+            </select>
+          </div>
+            <br>
+        </div>
+
+    </div>
+
+      <div id="hidden" class="form-group" style="display:none;">
+       <div class="container">
+         <div class="row">
+           <h5 class="card-title">Especifica las rimas: </h5>
+           <br>
+         </div>
+         <div class="row" id="hidden-form">
+           <br>
+         </div>
+       </div>
       </div>
 
-      <input id="create-poem" class="btn btn-primary" type="submit" name='submit' value="Generar poema" style="display:none;">
+        <input class="btn btn-primary" type="submit" name='submit' value="Generar poema">
   </form>
+</div>
 
 {% endblock %}
 

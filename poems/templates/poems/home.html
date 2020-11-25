@@ -3,10 +3,10 @@
 
 {% block title %}Home{% endblock %}
 
-{% block content %}
+{% block jumbo %}
 
-<h1>Welcome {{ user }}</h1>
-
-<a href="{% url 'poems:create_poem' %}"><button type="button" class="btn btn-primary">Click here to generate a poem</button></a>
+<p class="lead">¡Hola, humano {{ user }}!</p>
+<br>
+<a href="{% url 'poems:create_poem' %}"><button type="button" class="btn btn-primary">Generar Poema</button></a>
 
 {% endblock %}

@@ -12,6 +12,7 @@ requests = "*"
 ipython = "*"
 coverage = "*"
 django = "*"
+lxml = "*"
 
 [requires]
 python_version = "3.8"

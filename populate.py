@@ -5,14 +5,11 @@ from poems.models import AssonantRhyme, ConsonantRhyme, Verse
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "poemautomator.settings")
-django.setup()
-
 
 file = open('verse_list.csv', 'r')
 reader = csv.reader(file)
 
 rows = list(reader)
-
 
 for row in rows:
     assonant_rhyme = row[4]

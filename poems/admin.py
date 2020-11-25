@@ -4,15 +4,18 @@ from .models import Verse, AssonantRhyme, ConsonantRhyme
 
 
 class VerseAdmin(admin.ModelAdmin):
-    list_display = ('verse_text', 'verse_length', 'cons_rhy', 'asson_rhy', "date_of_creation")
+    list_display = ('id', 'verse_text', 'verse_length', 'cons_rhy', 'asson_rhy', "date_of_creation", "modified_date")
+    search_fields = ("verse_text",)
 
 
 class AssonantAdmin(admin.ModelAdmin):
-    list_display = ("assonant_rhyme", "verse_number")
+    list_display = ("id", "assonant_rhyme", "verse_number", "modified_date")
+    search_fields = ("assonant_rhyme",)
 
 
 class ConsonantAdmin(admin.ModelAdmin):
-    list_display = ("consonant_rhyme", "assonant_rhyme", "verse_number")
+    list_display = ("id", "consonant_rhyme", "assonant_rhyme", "verse_number", "modified_date")
+    search_fields = ("consonant_rhyme",)
 
 
 admin.site.register(Verse, VerseAdmin)

@@ -29,43 +29,45 @@ class CreatePoemView(FormView):
                 return HttpResponseRedirect(reverse_lazy("poems:poem") + "?" + query_string)
             return self.form_invalid(form)
 
-        return render(self.request, self.get_template_names() , context=self.get_context_data())
+        return render(self.request, self.get_template_names(), context=self.get_context_data())
 
 
 def validate_rhyme(request):
-    ver_len_value = request.GET.get("verse_length")
-    rhy_seq = request.GET.get("rhy_seq")
+    data = request.GET
+    for key in data:
+        if key == "verse_length":
+            ver_len_value = request.GET.get(key)
+        elif key == "rhy_seq":
+            rhy_seq = request.GET.get(key)
+        else:
+            rhyme_code = key
+            rhyme_value = request.GET.get(rhyme_code)
 
-    for key in request.GET:
-        if key != "verse_length" and key != "rhy_seq":
-            rhyme_value = request.GET.get(key)
+    if rhyme_value == rhyme_value.upper():  # Key is UPPERCASE -> consonant_rhyme checker
+        rhyme_value = Syllabifier(rhyme_value).consonant_rhyme  # This to be able to input either a word & an ending
 
-            if rhyme_value.startswith("-"):
-                rhyme_value = rhyme_value[1:]
-            else:
-                rhyme_value = Syllabifier(rhyme_value).assonant_rhyme
+        try:
+            filtered_verses = Verse.objects.filter(cons_rhy=ConsonantRhyme.objects.get(consonant_rhyme=rhyme_value),
+                                                   verse_length=ver_len_value)
+        except ConsonantRhyme.DoesNotExist:
+            filtered_verses = []
 
-            if key == key.upper():  # Key is UPPERCASE -> consonant_rhyme checker
-                try:
-                    filtered_verses = Verse.objects.filter(cons_rhy=ConsonantRhyme.objects.get(consonant_rhyme=rhyme_value),
-                                                           verse_length=ver_len_value)
-                except ConsonantRhyme.DoesNotExist:
-                    filtered_verses = []
+    else:  # Key is LOWERCASE -> assonant_rhyme checker
+        rhyme_value = Syllabifier(rhyme_value).assonant_rhyme
 
-            else:  # Key is LOWERCASE -> assonant_rhyme checker
-                try:
-                    filtered_verses = Verse.objects.filter(asson_rhy=AssonantRhyme.objects.get(assonant_rhyme=rhyme_value),
-                                                           verse_length=ver_len_value)
+        try:
+            filtered_verses = Verse.objects.filter(asson_rhy=AssonantRhyme.objects.get(assonant_rhyme=rhyme_value),
+                                                   verse_length=ver_len_value)
 
-                except AssonantRhyme.DoesNotExist:
-                    filtered_verses = []
+        except AssonantRhyme.DoesNotExist:
+            filtered_verses = []
 
-            data = {
-                "not_valid": len(filtered_verses) < 2 * rhy_seq.count(key)  # TODO -> Check if we can lower the value
-            }
+    data = {
+        "not_valid": len(filtered_verses) < 2 * rhy_seq.count(rhyme_code)  # TODO -> Check if we can lower the value
+    }
 
-            if data["not_valid"]:
-                data["error_message"] = "No hay rimas suficientes de este tipo en la base de datos para continuar.\n"
+    if data["not_valid"]:
+        data["error_message"] = "No hay rimas suficientes de este tipo en la base de datos para continuar."
 
     return JsonResponse(data)
 
@@ -75,47 +77,28 @@ class PoemView(ListView):
 
     def get_queryset(self):
         arguments = {}
+        rhymes_dict = {}
 
-        left_keys = dict(self.request.GET)
-
-        ver_num = self.request.GET.get('ver_num')  # required
-        arguments['ver_num'] = ver_num
-        del left_keys['ver_num']
-
-        if self.request.GET.get('verse_length'):
-            lon_ver = self.request.GET.get('verse_length')
-            arguments["verse_length"] = lon_ver
-            del left_keys['verse_length']
-
-        if self.request.GET.get('rhy_seq'):
-            rhy_seq = self.request.GET.get('rhy_seq')
-            arguments["rhy_seq"] = rhy_seq
-            del left_keys['rhy_seq']
-
-        if self.request.GET.get('select_verses') == "yes":
-            arguments["select_verses"] = True
-            del left_keys['select_verses']
-
-            for key in left_keys.keys():
+        for key in self.request.GET:
+            if key in ["submit", "select_verses"]:
+                continue
+            elif key in ["ver_num", "verse_length", "rhy_seq"]:
                 value = self.request.GET.get(key)
                 arguments[key] = value
+            else:
+                rhymes_dict[key] = self.request.GET.get(key)
 
-            automator = PoemAutomator(**arguments)
-            automator.determine_verse_set()
-            list_of_verses = automator.poem_generator()
+        if rhymes_dict:
+            arguments["rhymes_to_use"] = rhymes_dict
 
-        else:
-            automator = PoemAutomator(**arguments)
-            automator.random_rhymes()
-            list_of_verses = automator.poem_generator()
+        automator = PoemAutomator(**arguments)
+        automator.control_branches()
+        list_of_verses = automator.poem_generator()
 
         return list_of_verses
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['verse_length'] = self.request.GET.get('verse_length', '0')
-        context['cons_rhy'] = self.request.GET.get('cons_rhy', "")
-        context['asson_rhy'] = self.request.GET.get('asson_rhy', "")
-        context['last_word'] = self.request.GET.get('last_word', "")
+        # TODO ->  remember this to add functionality.
 
         return context
