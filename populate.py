@@ -1,8 +1,6 @@
-import django
 import os
 import csv
-from poems.models import AssonantRhyme, ConsonantRhyme, Verse
-
+from poems.models import AssonantRhyme, ConsonantRhyme, Verse, Word
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "poemautomator.settings")
 
@@ -33,16 +31,25 @@ for row in rows:
     is_end = row[8]
 
     try:
-        verse_obj = Verse.objects.get(verse_text=verse_text, cons_rhy=consonant_rhyme_obj, asson_rhy=assonant_rhyme_obj)
-    except Verse.DoesNotExist:
-        verse_obj = Verse.objects.create(verse_text=verse_text,
-                                         verse_length=verse_length,
-                                         last_word=last_word,
-                                         is_beg=is_beg,
-                                         is_int=is_int,
-                                         is_end=is_end,
-                                         cons_rhy=consonant_rhyme_obj,
-                                         asson_rhy=assonant_rhyme_obj,
+        word_object = Word.objects.get(word_text=last_word)
+    except Word.DoesNotExist:
+        word_object = Word.objects.create(word_text=last_word,
+                                          consonant_rhyme=consonant_rhyme_obj,
+                                          assonant_rhyme=assonant_rhyme_obj,
+                                          )
+
+    try:
+        verse_object = Verse.objects.get(verse_text=verse_text,
                                          )
 
-        verse_obj.save()
+    except Verse.DoesNotExist:
+        verse_object = Verse.objects.create(verse_text=verse_text,
+                                            verse_cut="".join(verse_text.split()[:1]),
+                                            verse_length=verse_length,
+                                            is_beg=is_beg,
+                                            is_int=is_int,
+                                            is_end=is_end,
+                                            )
+
+        verse_object.last_word.add(word_object)
+        verse_object.save()
