@@ -42,7 +42,7 @@ class Verse(models.Model):
     verse_length = models.IntegerField()
     assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE, default=1)
     consonant_rhyme = models.ForeignKey(ConsonantRhyme, on_delete=models.CASCADE, default=1)
-    last_word = models.ManyToManyField(Word)
+    last_word = models.ForeignKey(Word, on_delete=models.CASCADE)
     is_beg = models.BooleanField()
     is_int = models.BooleanField()
     is_end = models.BooleanField()
