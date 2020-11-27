@@ -73,5 +73,8 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover
-verse_list.csv
-design.odt
+database_clena_funcs/verse_list.csv
+database_clena_funcs/design.odt
+
+# Personal
+database_clena_funcs/

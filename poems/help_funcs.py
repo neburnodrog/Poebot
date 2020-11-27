@@ -147,10 +147,7 @@ def consonant_rhyme_finder(last_word, agullaes):
 
     block_clean = "".join([letter for letter in last_word if letter != "-"])
 
-    if len(block_clean) > 1 and not all(
-            letter in capitals for letter in block_clean
-    ):
-
+    if len(block_clean) > 1:
         while block_clean[0] not in vowels:
             if len(block_clean) > 2:
                 if block_clean[0].lower() in "qg" and (
@@ -172,7 +169,8 @@ def consonant_rhyme_finder(last_word, agullaes):
             block_clean = block_clean[1:]
 
     if " " in block_clean:
-        block_clean = "".join([letter for letter in block_clean if letter != " "])
+        block_clean = block_clean.replace(" ", "")
+
     return block_clean
 
 
@@ -197,7 +195,7 @@ def last_word_finder(sentence: str) -> str:
     sentence = sentence.strip(punct + " ")
 
     if sentence.count(" ") != 0:
-        last_word = sentence[sentence.rfind(" "):].strip(punct + " ")
+        last_word = sentence[sentence.rfind(" "):]
 
         if last_word == "y":
             last_word = sentence
@@ -207,11 +205,11 @@ def last_word_finder(sentence: str) -> str:
             if all([letter.isdigit() for letter in last_word]):
                 int_to_str(last_word)
 
-            return decapitalize(last_word.strip(punct + " "))
+            return decapitalize(last_word)
 
-        return decapitalize(last_word.strip(punct + " "))
+        return decapitalize(last_word)
 
-    return decapitalize(sentence.strip(punct + " "))
+    return decapitalize(sentence)
 
 
 def int_to_str(number: str) -> str:  # TODO

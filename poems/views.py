@@ -1,5 +1,5 @@
-import random
 from urllib.parse import urlencode
+from typing import Union, Optional, List, Tuple, Dict, Any
 
 from django.views.generic import ListView, FormView
 from django.http import JsonResponse, HttpResponseRedirect

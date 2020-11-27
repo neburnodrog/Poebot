@@ -1,15 +1,22 @@
 import os
 import csv
-from poems.models import AssonantRhyme, ConsonantRhyme, Verse, Word
+import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "poemautomator.settings")
+django.setup()
+
+from poems.models import AssonantRhyme, ConsonantRhyme, Verse, Word
+
 
 file = open('verse_list.csv', 'r')
 reader = csv.reader(file)
 
 rows = list(reader)
 
-for row in rows:
+length_rows = len(rows)
+
+for i, row in enumerate(rows):
+    print(f"[+] importing row to DB [{i}/{length_rows}]...")
     assonant_rhyme = row[4]
     try:
         assonant_rhyme_obj = AssonantRhyme.objects.get(assonant_rhyme=assonant_rhyme)
@@ -44,7 +51,7 @@ for row in rows:
 
     except Verse.DoesNotExist:
         verse_object = Verse.objects.create(verse_text=verse_text,
-                                            verse_cut="".join(verse_text.split()[:1]),
+                                            verse_cut="".join(verse_text.split()[:-1]),
                                             verse_length=verse_length,
                                             is_beg=is_beg,
                                             is_int=is_int,

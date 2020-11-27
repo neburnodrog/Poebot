@@ -13,6 +13,7 @@ ipython = "*"
 coverage = "*"
 django = "*"
 lxml = "*"
+langdetect = "*"
 
 [requires]
 python_version = "3.8"

@@ -4,8 +4,7 @@ from .models import Verse, AssonantRhyme, ConsonantRhyme, Word
 
 
 class WordAdmin(admin.ModelAdmin):
-    list_display = ('word_text',)
-    search_fields = ("word_text",)
+    search_fields = ("word_text", "amount_verses", "consonant_rhyme", "assonant_rhyme")
 
 
 class VerseAdmin(admin.ModelAdmin):
@@ -14,12 +13,13 @@ class VerseAdmin(admin.ModelAdmin):
 
 
 class AssonantAdmin(admin.ModelAdmin):
-    list_display = ("id", "assonant_rhyme", "amount_words", "modified_date")
+    list_display = ("id", "assonant_rhyme", "amount_words", "amount_verses", "modified_date")
     search_fields = ("assonant_rhyme",)
+    ordering = ["-amount_words", "-amount_verses"]
 
 
 class ConsonantAdmin(admin.ModelAdmin):
-    list_display = ("id", "consonant_rhyme", "assonant_rhyme", "amount_words", "modified_date")
+    list_display = ("id", "consonant_rhyme", "assonant_rhyme", "amount_words", "amount_verses", "modified_date")
     search_fields = ("consonant_rhyme",)
 
 
