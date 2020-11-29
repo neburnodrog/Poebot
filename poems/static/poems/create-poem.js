@@ -9,6 +9,29 @@ $(document).ready(function () {
   const $inputs = $("input");
   const $isValid = $(".is_valid");
   const $submit = $("#create-poem");
+  const help_messages_assonant = [
+    "Aquí o rima asonante o palabra. Ejemplo: '-oa' para rimar asonantemente con 'española'. Si no la palabra directamente: 'muerte'",
+    "Una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'",
+    "Elige entre una rima asonante o una palabra. Ejemplo: '-ae' para rimar asonantemente con 'encaje'. Si no la palabra directamente: 'muerte'",
+    "Aquí una rima asonante o una palabra. Ejemplo: '-uo' para rimar asonantemente con 'estuco'. Si no la palabra directamente: 'muerte'",
+    "Una rima asonante o una palabra. Ejemplo: '-oi' para rimar asonantemente con 'escoliósis'. Si no la palabra directamente: 'muerte'",
+    "Elige entre una rima asonante o una palabra. Ejemplo: '-aueo' para rimar asonantemente con 'áureo'. Si no la palabra directamente: 'muerte'",
+    "Aquí una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'",
+    "Una rima asonante o una palabra. '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'",
+    "Aquí una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'",
+
+  ];
+  const help_messages_consonant = [
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+    "Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'",
+
+  ];
 
 
   //## FUNCTIONS ##//
@@ -80,7 +103,13 @@ $(document).ready(function () {
         let $inp = $(this);
 
         if ( $inp.val().length !== $inp.val().split(" ").join("").length ) {
-          error_message = 'No se permiten espacios. O la palabra: "amor", o la rima: "or"/"o".';
+          error_message = 'No se permiten espacios. O la palabra: "amor", o la rima: "-or"/"-o".';
+          validInvalid( $inp, error_messsage );
+        } else if ( /^[a-zA-ZñÑ-]+$/.test( $inp.val() ) === false ) {
+          error_messsage = "Solo se permiten caracteres alfabéticos y el guión para especificar una rima."
+          validInvalid( $inp, error_messsage );
+        } else if ( /-/.test($inp.val()) == true && /^-/.test($inp.val()) === false ){
+          error_messsage = "El guión solo se permite una vez y al comienzo de la casilla."
           validInvalid( $inp, error_messsage );
         } else {
           $.ajax({
@@ -121,11 +150,15 @@ $(document).ready(function () {
     };
 
   function validInvalid( inputElement, msg ) {
+    if ( inputElement.next().length === 0 ) {
+        inputElement.parent().append("<small></small>")
+    };
+
     if ( inputElement.hasClass( "is-valid" ) ) {
-      inputElement.next() //small>
-                      .removeClass( "text-muted invalid-feedback" )
-                      .addClass( "valid-feedback" )
-                      .text( msg )
+        inputElement.next() //small>
+                        .removeClass( "text-muted invalid-feedback" )
+                        .addClass( "valid-feedback" )
+                        .text( msg )
     } else if ( inputElement.hasClass( "is-invalid" ) ) {
       inputElement.next()
                       .removeClass( "text-muted valid-feedback" )
@@ -155,7 +188,8 @@ $(document).ready(function () {
     } else {
         $( element ).removeClass("is-invalid").addClass("is-valid");
         validInvalid( $( element ), "Tiene buena pinta" );
-    }
+
+    };
   };
 
   if ( $rhySeq.val() !== "" ) {
@@ -197,12 +231,31 @@ $(document).ready(function () {
     } else {
         $(this).removeClass("is-invalid").addClass("is-valid");
         validInvalid( $( this ), "Tiene buena pinta" );
+        if ( $selVer.val() == "yes" ) {
+            $selVer.removeClass("is-invalid").addClass("is-valid");
+            validInvalid($selVer, "Ahora sí que puedes elejir las rimas");
+            createFormDinamically();
+        };
     };
   });
 
   $selVer.change(function() {
-       if ( $(this).val() === 'yes') {
-            createFormDinamically();
+       if ( $(this).val() === 'yes' ) {
+
+             if ( $rhySeq.hasClass( "is-valid" ) ) {
+
+                   if ( $( this ).hasClass("is-invalid") ) {
+                         $( this ).removeClass("is-invalid").addClass("is-valid");
+                         let message = "Ahora sí que tiene buena pinta, elije las rimas.";
+                         validInvalid( $( this ), message);
+                   };
+                   createFormDinamically();
+
+             } else {
+                   $( this ).removeClass("is-valid").addClass("is-invalid");
+                   let error_message = "La secuencia de rimas ha de ser válida para poder elegir las rimas";
+                   validInvalid( $( this ), error_message );
+             };
       } else {
         $( "#hidden" ).hide();
       };

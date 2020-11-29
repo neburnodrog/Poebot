@@ -14,7 +14,7 @@ class AssonantRhyme(models.Model):
 
 class ConsonantRhyme(models.Model):
     consonant_rhyme = models.TextField(unique=True)
-    assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE)
+    assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE, default=1)
     amount_words = models.IntegerField(default=0)
     amount_verses = models.IntegerField(default=0)
     date_of_creation = models.DateTimeField(auto_now_add=True)
@@ -38,16 +38,18 @@ class Word(models.Model):
 
 class Verse(models.Model):
     verse_text = models.TextField()
-    verse_cut = models.TextField(default="")
     verse_length = models.IntegerField()
-    assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE, default=1)
-    consonant_rhyme = models.ForeignKey(ConsonantRhyme, on_delete=models.CASCADE, default=1)
+    assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE)
+    consonant_rhyme = models.ForeignKey(ConsonantRhyme, on_delete=models.CASCADE)
     last_word = models.ForeignKey(Word, on_delete=models.CASCADE)
-    is_beg = models.BooleanField()
-    is_int = models.BooleanField()
-    is_end = models.BooleanField()
     date_of_creation = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+    is_beg = models.BooleanField(default=False)
+    is_int = models.BooleanField(default=False)
+    is_end = models.BooleanField(default=False)
 
     def __str__(self):
         return self.verse_text
+
+    def cut_verse(self):
+        return "".join(self.verse_text.split()[:-1])

@@ -61,38 +61,37 @@ class PoemAutomator:
         if isinstance(self.verse_length, range):  # Option C
             start = self.verse_length.start
             stop = self.verse_length.stop
-            verses_to_use = Verse.objects.filter(verse_length__gte=start, verse_length__lte=stop)
+            verses_to_use = Verse.objects.values().filter(verse_length__gte=start, verse_length__lte=stop)
 
-        elif len(self.verse_length) > 1:  # Option B -> List of Ints
+        elif len(self.verse_length) > 1:  # Option B -> List of Ints (TODO _> TODAVIA NO EXISTE ESTA OPCION)
             query = Q(verse_length=self.verse_length[0])
             for ver_len in self.verse_length[1:]:
                 query.add(Q(verse_length=ver_len), Q.OR)
 
-            verses_to_use = Verse.objects.filter(query)
+            verses_to_use = Verse.objects.values().filter(query)
 
         else:  # Option A -> Single integer value
-            verses_to_use = Verse.objects.filter(verse_length=self.verse_length[0])
+            verses_to_use = Verse.objects.values().filter(verse_length=self.verse_length[0])
 
         self.verses_available["a"] = verses_to_use
 
     def randomly_determine_rhymes(self) -> None:
-        """If user didn't select any concrete rhymes -> choose random ones"""
+        """If user didn't select any concrete rhymes -> choose random ones
+        We choose from a random word object that has a minimum as to how many children and siblings it must have"""
         for key in self.rhymes_to_use.keys():
-            limit = self.rhy_seq.count(key) * 3  # TODO Think about using the stranger ones
+            limit = self.rhy_seq.count(key) * 2  # TODO Think about lowering this value and use the stranger rhymes
 
             if key == key.upper():  # Consonant
-                word = random.choice(Word.objects.all())
-                rhyme_object = word.consonant_rhyme
-                while rhyme_object.amount_words < limit:  # TODO RETHINK THIS
-                    word = random.choice(Word.objects.all())
-                    rhyme_object = word.consonant_rhyme
+                words = Word.objects.values_list("consonant_rhyme_id").filter(amount_verses__gte=limit,
+                                                                              consonant_rhyme__amount_words__gte=limit)
+                cons_rhy_id = random.choice(words.distinct())[0]
+                rhyme_object = ConsonantRhyme.objects.get(cons_rhy_id)
 
             else:  # Assonant
-                word = random.choice(Word.objects.all())
-                rhyme_object = word.assonant_rhyme
-                while rhyme_object.verse_number < limit:
-                    word = random.choice(Word.objects.all())
-                    rhyme_object = word.assonant_rhyme
+                words = Word.objects.values_list("assonant_rhyme_id").filter(amount_verses__gte=limit,
+                                                                             assonant_rhyme__amount_words__gte=limit)
+                asson_rhy_id = random.choice(words.distinct())[0]
+                rhyme_object = AssonantRhyme.objects.get(asson_rhy_id)
 
             self.rhymes_to_use[key] = rhyme_object
 
@@ -120,11 +119,12 @@ class PoemAutomator:
         for key in self.rhymes_to_use.keys():
             rhyme_object = self.rhymes_to_use[key]
 
-            words = rhyme_object.word_set.all()
-
-            for word in words:
-                verses_to_use = word.verse_set.filter(verse_length=self.verse_length)
-                self.verses_available[key] = verses_to_use
+            if isinstance(self.verse_length, range):  # Option C
+                start = self.verse_length.start
+                stop = self.verse_length.stop
+                verses_to_use = Verse.objects.values().filter(verse_length__gte=start, verse_length__lte=stop)
+                words = rhyme_object.word_set.values("word_text").all()
+                self.verses_available[key] = {v: "" for k, v in words}
 
     def poem_generator(self) -> List[Verse]:
         poem = []  # List of verses
@@ -191,12 +191,12 @@ class PoemAutomator:
                         break
 
             if (Syllabifier(verse_to_use.last_word).syllables == syllables_new_word
-                       and getting_word_type(verse_to_use.last_word) == type_new_word
-                       and first_letter_new_word == find_first_letter(verse_to_use.last_word)):
+                    and getting_word_type(verse_to_use.last_word) == type_new_word
+                    and first_letter_new_word == find_first_letter(verse_to_use.last_word)):
                 new_word = word
 
             else:
-                new_word="It all failed... troubleshooting this at some point"
+                new_word = "It all failed... troubleshooting this at some point"
             #  Now change the new_word for the old one in verse_to_use
             new_verse_text = verse_to_use.verse_text.replace(verse_to_use.last_word, new_word)
             new_verse_object = save_new_verse_object(new_verse_text)
@@ -207,14 +207,16 @@ class PoemAutomator:
     def type_determiner(self, poem: List[Verse]) -> Dict:
         """Returns a list of booleans. True or False representing [is_beg, is_int, is_end]"""
 
+        types_dict = {}
+
         if len(poem) == 0 or poem[-1].verse_text.endswith("."):
-            types_dict = {"is_beg": True, "is_int": False}
+            types_dict["is_beg"] = True
 
-        elif len(poem) == self.ver_num - 1:
-            types_dict = {"is_int": False, "is_end": True}
+        if len(poem) == self.ver_num - 1:
+            types_dict["is_end"] = True
 
-        else:
-            types_dict = {"is_int": True}
+        if not ((len(poem) == 0 or poem[-1].verse_text.endswith(".")) and len(poem) == self.ver_num - 1):
+            types_dict["is_int"] = True
 
         return types_dict
 
@@ -335,6 +337,7 @@ def main():
     poem = poemator.poem_generator()
     poem = [verse.verse_text if verse != "" else "" for verse in poem]
     print("\n".join(poem))
+
 
 if __name__ == "__main__":
     main()

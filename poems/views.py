@@ -34,40 +34,53 @@ class CreatePoemView(FormView):
 
 def validate_rhyme(request):
     data = request.GET
+
     for key in data:
         if key == "verse_length":
             ver_len_value = request.GET.get(key)
         elif key == "rhy_seq":
-            rhy_seq = request.GET.get(key)
+            rhy_seq_value = request.GET.get(key)
         else:
             rhyme_code = key
-            rhyme_value = request.GET.get(rhyme_code)
+            rhyme_val = request.GET.get(rhyme_code)
 
-    if rhyme_value == rhyme_value.upper():  # Key is UPPERCASE -> consonant_rhyme checker
-        rhyme_value = Syllabifier(rhyme_value).consonant_rhyme  # This to be able to input either a word & an ending
+    if rhyme_code == rhyme_code.upper():  # Key is UPPERCASE -> consonant_rhyme checker
+        if rhyme_val.startswith("-"):
+            rhyme_val = rhyme_val.strip("-")
+        else:
+            rhyme_val = Syllabifier(rhyme_val).consonant_rhyme  # This to be able to input either a word & an ending
 
         try:
-            filtered_verses = Verse.objects.filter(cons_rhy=ConsonantRhyme.objects.get(consonant_rhyme=rhyme_value),
-                                                   verse_length=ver_len_value)
+            cons_obj = ConsonantRhyme.objects.get(consonant_rhyme=rhyme_val)
         except ConsonantRhyme.DoesNotExist:
-            filtered_verses = []
+            data = {"not_valid": True,
+                    "error_message": "Esta rima no existe en la base de datos por el momento."}
+
+            return JsonResponse(data)
+
+        verses_count = cons_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+        words_count = set(verses_count)
 
     else:  # Key is LOWERCASE -> assonant_rhyme checker
-        rhyme_value = Syllabifier(rhyme_value).assonant_rhyme
+        if rhyme_val.startswith("-"):
+            rhyme_val = rhyme_val.strip("-")
+        else:
+            rhyme_val = Syllabifier(rhyme_val).assonant_rhyme  # This to be able to input either a word & an ending
 
         try:
-            filtered_verses = Verse.objects.filter(asson_rhy=AssonantRhyme.objects.get(assonant_rhyme=rhyme_value),
-                                                   verse_length=ver_len_value)
-
+            asson_obj = AssonantRhyme.objects.get(assonant_rhyme=rhyme_val)
         except AssonantRhyme.DoesNotExist:
-            filtered_verses = []
+            data = {"not_valid": True,
+                    "error_message": "Esta rima no existe en la base de datos por el momento."}
+            return JsonResponse(data)
 
-    data = {
-        "not_valid": len(filtered_verses) < 2 * rhy_seq.count(rhyme_code)  # TODO -> Check if we can lower the value
-    }
+        verses_count = asson_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+        words_count = set(verses_count)
 
-    if data["not_valid"]:
-        data["error_message"] = "No hay rimas suficientes de este tipo en la base de datos para continuar."
+    if (len(verses_count) < 2 * rhy_seq_value.count(rhyme_code)
+        or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)):
+        data = {"not_valid": True,
+                "error_message": "No hay rimas suficientes de este tipo en la base de datos para continuar."}
 
     return JsonResponse(data)
 

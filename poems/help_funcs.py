@@ -1,14 +1,14 @@
 from typing import Optional, List
-import string
 import re
+from string import punctuation, ascii_uppercase, ascii_letters
 
 
-punct = "¡!\"#$%&'()*+,./:;<=>¿?@[\\]^_—{|}~-«”»"
-
+punct = punctuation + r'¡¿—«”»'
+uppercase = ascii_uppercase + "ÑÁÉÍÓÚ"
 vowels = "aeiouáéíóúAEIOUÁÉÍÓÚ"
 vowels_h = vowels + "h"
 consonants = (
-        "".join((letter for letter in string.ascii_letters if letter not in vowels)) + "ñÑ"
+        "".join((letter for letter in ascii_letters if letter not in vowels)) + "ñÑ"
 )
 
 debiles = "UIui"
@@ -16,7 +16,6 @@ debiles_tonicas = "ÚÍúí"
 fuertes = "AEOaeo"
 fuertes_tildadas = "ÁÉÓáéó"
 vowels_tildadas = "áéíóúÁÉÍÓÚ"
-capitals = string.ascii_uppercase
 
 
 def counter(sentence):
@@ -185,10 +184,20 @@ def assonant_rhyme_finder(consonant_rhyme):
 
 
 def type_verse(sentence):
-    beg = True if sentence[0].upper() == sentence[0] else False
-    inter = True if (not sentence.endswith(".") and sentence[0].upper() != sentence[0]) else False
-    end = True if sentence.endswith(".") else False
-    return beg, inter, end
+    is_beg = True if sentence.strip(punct)[0] in uppercase else False
+
+    if ((sentence.endswith("...") or not sentence.endswith("."))
+            and sentence.strip(punct)[0] not in uppercase):
+        is_int = True
+    else:
+        is_int = False
+
+    if sentence.endswith(".") and not sentence.endswith("..."):
+        is_end = True
+    else:
+        is_end = False
+
+    return is_beg, is_int, is_end
 
 
 def last_word_finder(sentence: str) -> str:
