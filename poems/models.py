@@ -52,4 +52,4 @@ class Verse(models.Model):
         return self.verse_text
 
     def cut_verse(self):
-        return "".join(self.verse_text.split()[:-1])
+        return " ".join(self.verse_text.split()[:-1])
