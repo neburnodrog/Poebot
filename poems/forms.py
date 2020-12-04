@@ -7,7 +7,8 @@ class CreatePoemForm(forms.Form):
 
     ver_num = forms.IntegerField(
         label="Número de versos",
-        help_text="Número entero positivo."
+        help_text="Número entero positivo.",
+        required=False,
     )
 
     verse_length = forms.IntegerField(
@@ -21,7 +22,7 @@ class CreatePoemForm(forms.Form):
     rhy_seq = forms.CharField(
         help_text="Mayúsculas: rima consonante. Minúsculas: asonante. Espacio(s) en blanco: verso en blanco. Ejemplo: ABBA ABBA",
         label="Secuencia de rimas",
-        required=False
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
@@ -29,4 +30,4 @@ class CreatePoemForm(forms.Form):
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             if visible == "ver_num":
-                visible.field.widget.attrs['onkeydown'] ="return event.keyCode !== 69"
+                visible.field.widget.attrs['onkeydown'] = "return event.keyCode !== 69"
