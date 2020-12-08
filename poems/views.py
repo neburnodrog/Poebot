@@ -1,4 +1,5 @@
 from urllib.parse import urlencode
+import random
 from typing import Union, Optional, List, Tuple, Dict, Any
 
 from django.views.generic import ListView, FormView
@@ -105,8 +106,7 @@ class PoemView(ListView):
             arguments["rhymes_to_use"] = rhymes_dict
 
         automator = PoemAutomator(**arguments)
-        automator.control_branches()
-        list_of_verses = automator.poem_generator()
+        list_of_verses = automator.poem
 
         return list_of_verses
 
@@ -115,3 +115,21 @@ class PoemView(ListView):
         # TODO ->  remember this to add functionality.
 
         return context
+
+
+def change_verse(request):
+    verse_id = request.GET.get('id')
+    verse_to_change = Verse.objects.filter(id=verse_id).values(
+        "verse_length",
+        "consonant_rhyme",
+        "is_beg",
+        "is_int",
+        "is_end",)[0]
+
+    if possible_verses := Verse.objects.filter(**verse_to_change).exclude(id=verse_id):
+        new_verse_id = random.choice(possible_verses.values_list("id"))[0]
+        data = Verse.objects.filter(id=new_verse_id).values("id", "verse_text")[0]
+    else:
+        data = {"not_valid": True}
+
+    return JsonResponse(data)

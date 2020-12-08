@@ -127,6 +127,8 @@ class PoemAutomator:
                 if verse:
                     return verse
 
+
+
         else:
             wordset_list = list(wordset)
 
@@ -386,7 +388,7 @@ def main():
     verse_length = input("Enter length of verses (ex: 5 or 5_8 (range) or 5, 8 (list of possible length): ").strip()
     rhy_seq = input("Enter sequence of rhymes").strip()
     poem_automator = PoemAutomator(ver_num=ver_num, verse_length=verse_length, rhy_seq=rhy_seq)
-    print("".join(poem_automator.poem))
+    print("\n".join([verse.verse_text if isinstance(verse, Verse) else "" for verse in poem_automator.poem]))
 
 
 if __name__ == "__main__":

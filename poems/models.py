@@ -86,4 +86,6 @@ class Verse(models.Model):
         return self.verse_text
 
     def cut_verse(self):
-        return " ".join(self.verse_text.split()[:-1])
+        chopped_verse = self.verse_text.split()
+        verse_cut, last_word = chopped_verse[:-1], chopped_verse[-1]
+        return " ".join(verse_cut), last_word

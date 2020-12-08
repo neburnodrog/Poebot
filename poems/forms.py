@@ -9,14 +9,15 @@ class CreatePoemForm(forms.Form):
         label="Número de versos",
         help_text="Número entero positivo.",
         required=False,
+        max_value=20
     )
 
     verse_length = forms.IntegerField(
         help_text="Medidos en número de sílabas (Mínimo 5 y máximo 19).",
         label="Longitud de los versos",
         required=False,
-        min_value=4,
-        max_value=20,
+        min_value=5,
+        max_value=19,
     )
 
     rhy_seq = forms.CharField(

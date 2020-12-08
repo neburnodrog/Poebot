@@ -285,13 +285,13 @@ $(document).ready(function () {
       $( this ).removeClass( "is-invalid" ).addClass( "is-valid" );
       validInvalid( $( this ), "Si dejas este valor en blanco se generarán versos de tamaño variable y aleatorio" );
 
-    } else if ( 3 < verLenVal && verLenVal < 21 ) {
+    } else if ( 4 < verLenVal && verLenVal < 20 ) {
       $( this ).removeClass( "is-invalid" ).addClass( "is-valid" );
       validInvalid( $( this ), "Tiene buena pinta." );
 
     } else {
       $(this).removeClass( "is-valid" ).addClass( "is-invalid" );
-      validInvalid( $( this ), "El valor ha de ser un número entero positivo entre 4 y 20" );
+      validInvalid( $( this ), "El valor ha de ser un número entero positivo entre 5 y 19" );
     };
   });
 });

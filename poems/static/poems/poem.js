@@ -2,14 +2,13 @@
 $(document).ready(function () {
 
   function swap(a, b) {
-      let a_mark = $("<span>").insertAfter(a);
-      let b_mark = $("<span>").insertAfter(b);
-      b.insertBefore(a_mark);
-      a.insertBefore(b_mark);
-      a_mark.remove();
-      b_mark.remove();
-
-  };
+    var verse_chosen_text = a.text();
+    var verse_chosen_id = a.attr("id");
+    var other_verse_text = b.text();
+    var other_verse_id = b.attr("id");
+    a.text(other_verse_text).attr("id", other_verse_id);
+    b.text(verse_chosen_text).attr("id", verse_chosen_id);
+  }
 
   $( '#reload' ).click( function() {
       location.reload();
@@ -23,19 +22,34 @@ $(document).ready(function () {
   });
 
   $( ".bi-arrow-down-short" ).click( function() {
-    let verse = $(this).parent().next().children();
-    let verse_index = verse.index($( ".verse" ));
-    let verse_to_change_with = $( ".verse" ).eq(verse_index + 1);
-    swap(verse, verse_to_change_with);
-
+    var verse_chosen = $(this).parent().next().children();
+    var verse_index = $( ".verse" ).index(verse_chosen);
+    var verse_next = $( ".verse" ).eq(verse_index + 1);
+    swap(verse_chosen, verse_next);
   });
 
   $( ".bi-arrow-up-short" ).click( function() {
-    let verse = $(this).parent().next().children();
-    let verse_index = verse.index($( ".verse" ));
-    let verse_to_change_with = $( ".verse" ).eq(verse_index + -1);
-    swap(verse, verse_to_change_with);
+    var verse_chosen = $(this).parent().next().children();
+    var verse_index = $( ".verse" ).index(verse_chosen);
+    var verse_prev = $( ".verse" ).eq(verse_index - 1);
+    swap(verse_chosen, verse_prev);
+  });
 
-  })
-  ;
+  $(".oi").click( function () {
+    var $verse_to_change = $(this).parent().prev().children();
+
+    $.ajax({
+      url: '/change_verse/',
+      data: `id=${$verse_to_change.attr("id")}`,
+      dataType: "json",
+      success: function(data){
+        if ( data.not_valid ) {
+          $verse_to_change.css("color", "red")
+        } else {
+          $verse_to_change.attr("id", data.id).text(data.verse_text);
+        };
+      }
+    });
+  });
+
 });
