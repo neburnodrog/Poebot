@@ -7,9 +7,10 @@ class CreatePoemForm(forms.Form):
 
     ver_num = forms.IntegerField(
         label="Número de versos",
-        help_text="Número entero positivo.",
+        help_text="Este campo requiere un entero positivo menor o igual a 20 para germinar.",
         required=False,
-        max_value=20
+        min_value=1,
+        max_value=20,
     )
 
     verse_length = forms.IntegerField(
@@ -21,7 +22,7 @@ class CreatePoemForm(forms.Form):
     )
 
     rhy_seq = forms.CharField(
-        help_text="Mayúsculas: rima consonante. Minúsculas: asonante. Espacio(s) en blanco: verso en blanco. Ejemplo: ABBA ABBA",
+        help_text="Mayúsculas: rima consonante. Minúsculas: asonante. <br>Espacio(s) en blanco: verso en blanco. Ejemplo: ABBA ABBA",
         label="Secuencia de rimas",
         required=False,
     )

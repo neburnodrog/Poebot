@@ -4,7 +4,7 @@
 
 {% block jumbo %}
 <div class="container">
-  <form action="" method="get">
+  <form method="get">
 
       <div class="row">
       {% for field in form %}
@@ -33,7 +33,7 @@
         <div class="col-6">
           <div class="form-group">
             <label for="id_select_verses" style="display:none;">Quieres elegir las rimas?</label>
-            <select class="form-control" id="id_select_verses" style="display:none;">
+            <select class="form-select" id="id_select_verses" style="display:none;">
               <option value="no">No</option>
               <option value="yes">Sí</option>
               <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->

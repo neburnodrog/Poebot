@@ -10,10 +10,8 @@ psycopg2-binary = "*"
 beautifulsoup4 = "*"
 requests = "*"
 ipython = "*"
-coverage = "*"
 django = "*"
 lxml = "*"
-langdetect = "*"
 
 [requires]
 python_version = "3.8"

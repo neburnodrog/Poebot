@@ -62,41 +62,45 @@ $(document).ready(function () {
   };
 
   function createFormDinamically() {
-      $hiddenForm.empty();
-      // TODO https://getbootstrap.com/docs/4.1/components/collapse/#example
+    $hiddenForm.empty();
+    // TODO https://getbootstrap.com/docs/4.1/components/collapse/#example
 
-      let seqList = uniqueRhymes();
+    let seqList = uniqueRhymes();
+    $( "<div></div>" ).addClass("col-1").appendTo($hiddenForm);
+    $( "<div></div>" ).addClass("col-10").attr("id", "containerCol").appendTo($hiddenForm);
+    $( "<div></div>" ).addClass("row").attr("id", "containerRow").appendTo($("#containerCol"))
+    for (i = 0; i < seqList.length; i++) {
+       var $div = $( "<div></div>" );
+       $div.addClass( "col-6" ).appendTo( $( "#containerRow" ) );
+       let seqKey = seqList[i];
 
-      for (i = 0; i < seqList.length; i++) {
-         let $div = $( "<div></div>" ).addClass("col-6").appendTo($hiddenForm);
-         let seqKey = seqList[i];
+       if (isUpperCase(seqKey)) {
+            $div.append($( "<label>" )
+                          .attr("for", seqKey)
+                          .text(`Rima consonante ${seqKey}:`));
+       } else {
+            $div.append($( "<label>" )
+                          .attr("for", seqKey)
+                          .text(`Rima asonante ${seqKey}:`));
+       }
 
-         if (isUpperCase(seqKey)) {
-              $div.append($( "<label>" )
-                            .attr("for", seqKey)
-                            .text(`Rima consonante ${seqKey}:`));
-         } else {
-              $div.append($( "<label>" )
-                            .attr("for", seqKey)
-                            .text(`Rima asonante ${seqKey}:`));
-         };
+       $div.append( $( "<input type='text'>" )
+                    .attr("name", seqKey)
+                    .attr("id", seqKey)
+                    .attr("class", "form-control rhyme_validator")
+                    .attr("required", "required") );
 
-         $div.append( $( "<input type='text'>" )
-                      .attr("name", seqKey)
-                      .attr("id", seqKey)
-                      .attr("class", "form-control rhyme_validator")
-                      .attr("required", "required") );
-
-         if (isUpperCase(seqKey)) {
-              $div.append($( "<small></small>" )
-                          .attr("class", "form-text text-muted")
-                          .text("Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'"));
-         } else {
-              $div.append($( "<small></small>" )
-                          .attr("class", "form-text text-muted")
-                          .text("Aquí una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'"));
-         };
-    };
+       if (isUpperCase(seqKey)) {
+            $div.append($( "<small></small>" )
+                        .attr("class", "form-text text-muted")
+                        .text("Aquí una rima consonante o una palabra. Ejemplo: '-oba' para rimar consonantemente con 'alcoba'. Si no la palabra directamente: 'amor'"));
+       } else {
+            $div.append($( "<small></small>" )
+                        .attr("class", "form-text text-muted")
+                        .text("Aquí una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'"));
+       }
+    }
+    $( "<div></div>" ).addClass("col-1").appendTo($hiddenForm);
 
     let $rhyValid = $(".rhyme_validator");
     $rhyValid.change(function() {
@@ -104,13 +108,13 @@ $(document).ready(function () {
 
         if ( $inp.val().length !== $inp.val().split(" ").join("").length ) {
           error_message = 'No se permiten espacios. O la palabra: "amor", o la rima: "-or"/"-o".';
-          validInvalid( $inp, error_messsage );
-        } else if ( /^[a-zA-ZñÑ-]+$/.test( $inp.val() ) === false ) {
+          validInvalid( $inp, error_messsage, valid=false );
+        } else if ( /^[a-zA-ZñÑÓóÁáÉéíÍúÚü-]+$/.test( $inp.val() ) === false ) {
           error_messsage = "Solo se permiten caracteres alfabéticos y el guión para especificar una rima."
-          validInvalid( $inp, error_messsage );
+          validInvalid( $inp, error_messsage, valid=false );
         } else if ( /-/.test($inp.val()) == true && /^-/.test($inp.val()) === false ){
           error_messsage = "El guión solo se permite una vez y al comienzo de la casilla."
-          validInvalid( $inp, error_messsage );
+          validInvalid( $inp, error_messsage, valid=false );
         } else {
           $.ajax({
                 url: "/validate/",
@@ -119,21 +123,19 @@ $(document).ready(function () {
                 success: function(data) {
 
                     if (data.not_valid) {
-                      $inp.removeClass("is-valid").addClass("is-invalid");
-                      validInvalid( $inp, data.error_message )
+                      validInvalid( $inp, data.error_message, valid=false )
 
                     } else {
-                      $inp.removeClass("is-invalid").addClass("is-valid");
-                      validInvalid( $inp, "Tiene buena pinta" )
+                      validInvalid( $inp, "Tiene buena pinta", valid=true )
 
-                    };
+                    }
                 }
           });
-        };
+        }
     });
 
     $('#hidden').show();
-  };
+  }
 
   function showSelect() {
     $selVer
@@ -149,7 +151,13 @@ $(document).ready(function () {
         .hide();
     };
 
-  function validInvalid( inputElement, msg ) {
+  function validInvalid( inputElement, msg, valid ) {
+    if (valid) {
+      inputElement.removeClass("is-invalid").addClass("is-valid");
+    } else {
+      inputElement.removeClass("is-valid").addClass("is-invalid");
+    }
+
     if ( inputElement.next().length === 0 ) {
         inputElement.parent().append("<small></small>")
     };
@@ -171,23 +179,20 @@ $(document).ready(function () {
     let verNumVal = Number($verNum.val());
 
     if ( $( element ).val() === "" ) {
-      $( element ).removeClass( "is-invalid" ).addClass( "is-valid" );
-      validInvalid( $( element ), "Si dejas esta celda en blanco se generarán versos aleatorios" );
+      let error_message = "Mayúsculas: rima consonante. Minúsculas: asonante. Espacio(s) en blanco: verso en blanco. Ejemplo: ABBA ABBA. Si dejas esta celda en blanco se generarán versos aleatorios"
+      validInvalid( $( element ), error_message, true );
 
     //IF NOT ALL CHARACTERS MATCH THE REGEX -> ERROR
     } else if ( /^[a-zA-ZñÑ\s]+$/.test( $( element ).val() ) === false ) {
-        $( element ).removeClass( "is-valid" ).addClass( "is-invalid" );
         let error_message = "La secuencia de rimas solo admite caracteres del abecedario y espacios en blanco";
-        validInvalid( $( element ), error_message );
+        validInvalid( $( element ), error_message, false);
 
     } else if ( $( element ).val().split(" ").join("").length !== verNumVal ) {
-        $( element ).removeClass( "is-valid" ).addClass( "is-invalid" );
         let error_message = "El número de caracteres en la secuencia de rimas ha de coincidir con el numero especificado de versos (sin contar espacios)"
-        validInvalid( $( element ), error_message );
+        validInvalid( $( element ), error_message, false );
 
     } else {
-        $( element ).removeClass("is-invalid").addClass("is-valid");
-        validInvalid( $( element ), "Tiene buena pinta" );
+        validInvalid( $( element ), "Tiene buena pinta", true );
 
     };
   };
@@ -214,23 +219,19 @@ $(document).ready(function () {
     let verNumVal = Number($verNum.val());
 
     if ( $( this ).val() === "" ) {
-      $( this ).removeClass( "is-invalid" ).addClass( "is-valid" );
-      validInvalid( $( this ), "Si dejas esta celda en blanco se generarán versos aleatorios" );
+      validInvalid( $( this ), "Si dejas esta celda en blanco se generarán versos aleatorios", valid=true );
 
     //IF NOT ALL CHARACTERS MATCH THE REGEX -> ERROR
     } else if ( /^[a-zA-ZñÑ\s]+$/.test( $( this ).val() ) === false ) {
-        $( this ).removeClass( "is-valid" ).addClass( "is-invalid" );
         let error_message = "La secuencia de rimas solo admite caracteres del abecedario y espacios en blanco";
-        validInvalid( $( this ), error_message );
+        validInvalid( $( this ), error_message, valid=false );
 
     } else if ( $( this ).val().split(" ").join("").length !== verNumVal ) {
-        $( this ).removeClass( "is-valid" ).addClass( "is-invalid" );
         let error_message = "El número de caracteres en la secuencia de rimas ha de coincidir con el numero especificado de versos (sin contar espacios)"
-        validInvalid( $( this ), error_message );
+        validInvalid( $( this ), error_message, valid=false );
 
     } else {
-        $(this).removeClass("is-invalid").addClass("is-valid");
-        validInvalid( $( this ), "Tiene buena pinta" );
+        validInvalid( $( this ), "Tiene buena pinta", valid=true );
         if ( $selVer.val() == "yes" ) {
             $selVer.removeClass("is-invalid").addClass("is-valid");
             validInvalid($selVer, "Ahora sí que puedes elejir las rimas");
@@ -245,16 +246,14 @@ $(document).ready(function () {
              if ( $rhySeq.hasClass( "is-valid" ) ) {
 
                    if ( $( this ).hasClass("is-invalid") ) {
-                         $( this ).removeClass("is-invalid").addClass("is-valid");
                          let message = "Ahora sí que tiene buena pinta, elije las rimas.";
-                         validInvalid( $( this ), message);
+                         validInvalid( $( this ), message, valid=true);
                    };
                    createFormDinamically();
 
              } else {
-                   $( this ).removeClass("is-valid").addClass("is-invalid");
                    let error_message = "La secuencia de rimas ha de ser válida para poder elegir las rimas";
-                   validInvalid( $( this ), error_message );
+                   validInvalid( $( this ), error_message, valid=false );
              };
       } else {
         $( "#hidden" ).hide();
@@ -264,14 +263,15 @@ $(document).ready(function () {
   $verNum.change( function() {
     let verNumVal = Number( $( this ).val() );
 
-    if ( verNumVal > 0 ) {
-      $( this ).removeClass("is-invalid").addClass("is-valid");
-      validInvalid( $( this ), "Tiene buena pinta." );
-
+    if ( 0 < verNumVal && verNumVal < 21 ) {
+      validInvalid( $( this ), "Esto tiene buena pinta.", valid=true );/* Tiene buena pinta */
+    } else if ( verNumVal === "" ) {
+      message = ""
+      validInvalid( $( this ), message, valid=true );
     } else {
-      $( this ).removeClass("is-valid").addClass("is-invalid");
-      validInvalid( $( this ), "El valor ha de ser un número entero positivo" );
-    };
+      error_message = "El valor de la casilla ha de ser un número entero positivo menor o igual a 20.";
+      validInvalid( $( this ), error_message, valid=false );
+    }
 
     if ( $rhySeq.val() !== "" ){
       validateRhymesSequence($rhySeq);
@@ -281,17 +281,17 @@ $(document).ready(function () {
   $verLen.change( function() {
     let verLenVal = $( this ).val();
 
-    if ( verLenVal === "" ) {
-      $( this ).removeClass( "is-invalid" ).addClass( "is-valid" );
-      validInvalid( $( this ), "Si dejas este valor en blanco se generarán versos de tamaño variable y aleatorio" );
+    if ( verLenVal === "") {
+      message = "Si dejas este valor en blanco se generarán versos de tamaño variable y aleatorio"
+      validInvalid( $( this ), message, valid=true );
 
     } else if ( 4 < verLenVal && verLenVal < 20 ) {
-      $( this ).removeClass( "is-invalid" ).addClass( "is-valid" );
-      validInvalid( $( this ), "Tiene buena pinta." );
+      message = "Me gusta, no parece un número indigesto."
+      validInvalid( $( this ), message, valid=true ); /* Tiene buena pinta */
 
     } else {
-      $(this).removeClass( "is-valid" ).addClass( "is-invalid" );
-      validInvalid( $( this ), "El valor ha de ser un número entero positivo entre 5 y 19" );
+      message = "El valor ha de ser un número entero positivo entre 5 y 19"
+      validInvalid( $( this ), message, valid=false );
     };
   });
 });
