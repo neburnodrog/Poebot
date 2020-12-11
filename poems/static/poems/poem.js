@@ -1,6 +1,8 @@
 
 $(document).ready(function () {
 
+  const $verses = $( ".verse" )
+
   function swap(a, b) {
     var verse_chosen_text = a.text();
     var verse_chosen_id = a.attr("id");
@@ -14,7 +16,7 @@ $(document).ready(function () {
       location.reload();
   });
 
-  $( ".verse" ).click( function() {
+  $verses.click( function() {
       $( this ).attr("contenteditable", true);
       $( this ).blur( function() {
           $( this ).attr("contenteditable", false);
@@ -23,15 +25,15 @@ $(document).ready(function () {
 
   $( ".bi-arrow-down-short" ).click( function() {
     var verse_chosen = $(this).parent().next().children();
-    var verse_index = $( ".verse" ).index(verse_chosen);
-    var verse_next = $( ".verse" ).eq(verse_index + 1);
+    var verse_index = $verses.index(verse_chosen);
+    var verse_next = $verses.eq(verse_index + 1);
     swap(verse_chosen, verse_next);
   });
 
   $( ".bi-arrow-up-short" ).click( function() {
     var verse_chosen = $(this).parent().next().children();
-    var verse_index = $( ".verse" ).index(verse_chosen);
-    var verse_prev = $( ".verse" ).eq(verse_index - 1);
+    var verse_index = $verses.index(verse_chosen);
+    var verse_prev = $verses.eq(verse_index - 1);
     swap(verse_chosen, verse_prev);
   });
 
@@ -51,5 +53,7 @@ $(document).ready(function () {
       }
     });
   });
+
+  verses$verses
 
 });
