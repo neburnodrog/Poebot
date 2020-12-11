@@ -8,10 +8,8 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "poemautomator.settings")
 django.setup()
 #################
-from django.db.models import Q, QuerySet
-
+from django.db.models import QuerySet
 from poems.analyse_verses import Syllabifier
-from poems.online_rhymer import Rhymer
 from poems.models import Verse, AssonantRhyme, ConsonantRhyme, Word
 
 
@@ -314,28 +312,7 @@ class WordSet:
         self.used_words.append(word)
 
 
-def online_rhyme_finder(**kwargs) -> List[str]:
-    rhymes_object = Rhymer(**kwargs)
-    rhymes_list = rhymes_object.getting_cronopista()
-
-    if rhymes_list:
-        return rhymes_list
-
-    else:
-        word = kwargs.get("word")
-        rhyme_type = kwargs.get("rhyme_type")
-        words_used = kwargs.get("words_used")
-
-        rhymes_object = Rhymer(word=word, rhyme_type=rhyme_type, words_used=words_used, first_letter="I")
-        rhymes_list = rhymes_object.getting_cronopista()
-
-        if rhymes_list:
-            return rhymes_list
-
-        else:
-            return ["Qué coño voy a saber yo.. joder"]
-
-
+'''
 def change_type(verse_types):
     pass
     """Possible solutions:
@@ -355,33 +332,7 @@ def change_type(verse_types):
         query.add(Q(is_beg=True), Q.OR)
 
     return query
-
-
-def save_new_verse_object(new_verse_text: str) -> Verse:
-    verse_analysed = Syllabifier(new_verse_text)
-    try:
-        assonant_object = AssonantRhyme.objects.get(assonant_rhyme=verse_analysed.assonant_rhyme)
-    except AssonantRhyme.DoesNotExist:
-        assonant_object = AssonantRhyme.objects.create(assonant_object=verse_analysed.assonant_rhyme)
-
-    try:
-        consonant_object = ConsonantRhyme.objects.get(consonant_rhyme=verse_analysed.consonant_rhyme)
-    except AssonantRhyme.DoesNotExist:
-        consonant_object = ConsonantRhyme.objects.create(consonant_rhyme=verse_analysed.consonant_rhyme)
-
-    new_verse = Verse.objects.create(verse_text=verse_analysed.sentence,
-                                     verse_length=verse_analysed.syllables,
-                                     last_word=verse_analysed.last_word,
-                                     is_beg=verse_analysed.beg,
-                                     is_int=verse_analysed.int,
-                                     is_end=verse_analysed.end,
-                                     asson_rhy=assonant_object,
-                                     cons_rhy=consonant_object,
-                                     )
-
-    new_verse.save()
-    return new_verse
-
+'''
 
 def main():
     ver_num = input("Enter number of verses:").strip()

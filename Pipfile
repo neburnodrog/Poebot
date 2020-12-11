@@ -7,11 +7,7 @@ verify_ssl = true
 
 [packages]
 psycopg2-binary = "*"
-beautifulsoup4 = "*"
-requests = "*"
-ipython = "*"
 django = "*"
-lxml = "*"
 
 [requires]
 python_version = "3.8"
