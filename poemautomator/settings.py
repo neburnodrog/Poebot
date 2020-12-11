@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'poems',
         'USER': 'django-poems',
-        'PASSWORD': '1234',
+        'PASSWORD': os.environ["DB_PASSWORD"],
         'HOST': '',
         'PORT': '',
         'OPTIONS': {
