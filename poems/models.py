@@ -2,7 +2,7 @@ from django.db import models
 
 
 class AssonantRhyme(models.Model):
-    assonant_rhyme = models.TextField(unique=True)
+    assonant_rhyme = models.CharField(unique=True, max_length=10)
     amount_words = models.IntegerField(default=0)
     amount_verses = models.IntegerField(default=0)
     date_of_creation = models.DateTimeField(auto_now_add=True)
@@ -13,7 +13,7 @@ class AssonantRhyme(models.Model):
 
 
 class ConsonantRhyme(models.Model):
-    consonant_rhyme = models.TextField(unique=True)
+    consonant_rhyme = models.CharField(unique=True, max_length=20)
     assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE, default=1)
     amount_words = models.IntegerField(default=0)
     amount_verses = models.IntegerField(default=0)
@@ -25,7 +25,7 @@ class ConsonantRhyme(models.Model):
 
 
 class Word(models.Model):
-    word_text = models.TextField(unique=True)
+    word_text = models.CharField(max_length=50)
     assonant_rhyme = models.ForeignKey(AssonantRhyme, on_delete=models.CASCADE)
     consonant_rhyme = models.ForeignKey(ConsonantRhyme, on_delete=models.CASCADE)
     amount_verses = models.IntegerField(default=0)
