@@ -11,21 +11,22 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-STATIC_DIR = BASE_DIR / "static"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '^&2%9tyu)^)v278hf03l44+!o6dz=w@mv**o)s)y^wdek_r01u'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['neburg.eu.pythonanywhere.com']
 
 # Application definition
 
@@ -76,13 +77,13 @@ DATABASES = {
 
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'poems',
-        'USER': 'django-poems',
-        'PASSWORD': '1234',
-        'HOST': '',
-        'PORT': '',
+        'NAME': 'neburG$poems',
+        'HOST': 'neburG.mysql.eu.pythonanywhere-services.com',
+        'USER': 'neburG',
+        'PORT': '5432',
+        'PASSWORD': os.getenv("DB_PWD"),
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
     }
 }
@@ -120,5 +121,19 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+STATIC_DIR = BASE_DIR / "static"
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [STATIC_DIR, ]
+STATIC_ROOT = "/home/neburG/poems/Spanish-Poem-Generator/static/"
+
+## Deploy
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
+
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+
+ADMINS = [('nebur', 'neburgordon@gmail.com')]
+MANAGERS = [('nebur', 'neburgordon@gmail.com')]
