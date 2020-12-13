@@ -80,8 +80,8 @@ DATABASES = {
         'NAME': 'neburG$poems',
         'HOST': 'neburG.mysql.eu.pythonanywhere-services.com',
         'USER': 'neburG',
-        'PORT': '5432',
-        'PASSWORD': os.getenv("DB_PWD"),
+        'PORT': '3306',
+        'PASSWORD': 'ortopeda',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
