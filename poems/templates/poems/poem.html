@@ -15,15 +15,13 @@
           </div>
     </div><br><br><br>
 
-    <div id="poem" class="container">
-
             {% for verse in object_list %}
 
                       {% if verse %}
                       <div class="row">
-                          <div class="col-4 text"></div>
-                        <div class="col-6 text-left"><span id="{{verse.id}}" name="verse_id" class="verse">{{ verse.verse_text }}</span></div>
-                        <div class="col-2">
+                          <div class="col-1 text"></div>
+                        <div class="col text-left"><span id="{{verse.id}}" name="verse_id" class="verse">{{ verse.verse_text }}</span></div>
+                        <div class="col-1">
                               <span class="oi oi-loop-circular" title="icon loop-circular"></span>
                         </div>
 
@@ -41,7 +39,6 @@
 
             {% endfor %}
 
-    </div>
     <br><br>
 
 </div>
