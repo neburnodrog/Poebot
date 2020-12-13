@@ -16,6 +16,8 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_DIR = BASE_DIR / "static"
+STATIC_URL = '/static/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -26,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['neburg.eu.pythonanywhere.com']
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -77,11 +79,11 @@ DATABASES = {
 
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'neburG$poems',
-        'HOST': 'neburG.mysql.eu.pythonanywhere-services.com',
-        'USER': 'neburG',
-        'PORT': '3306',
-        'PASSWORD': 'ortopeda',
+        'NAME': 'poems',
+        'HOST': 'localhost',
+        'USER': 'django-poems',
+        'PORT': '5432',
+        'PASSWORD': os.getenv("DB_PWD"),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
@@ -119,7 +121,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+"""# Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_DIR = BASE_DIR / "static"
 STATIC_URL = '/static/'
@@ -137,3 +139,4 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 ADMINS = [('nebur', 'neburgordon@gmail.com')]
 MANAGERS = [('nebur', 'neburgordon@gmail.com')]
+"""
