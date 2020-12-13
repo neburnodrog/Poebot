@@ -26,7 +26,7 @@ STATIC_URL = '/static/'
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -79,10 +79,10 @@ DATABASES = {
 
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'poems',
-        'HOST': 'localhost',
-        'USER': 'django-poems',
-        'PORT': '5432',
+        'NAME': 'nebur$poems',
+        'HOST': 'neburG.mysql.eu.pythonanywhere-services.com',
+        'USER': 'neburG',
+        'PORT': '3306',
         'PASSWORD': os.getenv("DB_PWD"),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -121,7 +121,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-"""# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_DIR = BASE_DIR / "static"
 STATIC_URL = '/static/'
@@ -139,4 +139,3 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 ADMINS = [('nebur', 'neburgordon@gmail.com')]
 MANAGERS = [('nebur', 'neburgordon@gmail.com')]
-"""
