@@ -79,4 +79,4 @@ database_clena_funcs/design.odt
 # Personal
 database_clean_funcs/
 backup/
-.app_pwd
+.envrc
