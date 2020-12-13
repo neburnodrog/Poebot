@@ -124,8 +124,7 @@ class PoemAutomator:
                 verse = self.select_verse(new_word, poem)
                 if verse:
                     return verse
-
-
+                i += 1
 
         else:
             wordset_list = list(wordset)
