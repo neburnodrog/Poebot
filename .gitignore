@@ -80,3 +80,5 @@ database_clena_funcs/design.odt
 database_clean_funcs/
 backup/
 .envrc
+populate.py
+static/
