@@ -17,6 +17,7 @@ fuertes = "AEOaeo"
 fuertes_tildadas = "ÁÉÓáéó"
 vowels_tildadas = "áéíóúÁÉÍÓÚ"
 
+
 def counter(sentence):
     sil_count = sentence.count("-")
     last_word = last_word_finder(sentence)

@@ -82,3 +82,4 @@ backup/
 .envrc
 populate.py
 static/
+poemautomator/local_settings.py
