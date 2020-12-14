@@ -42,7 +42,7 @@ $(document).ready(function () {
 
     $.ajax({
       url: '/change_verse/',
-      data: `id=${$verse_to_change.attr("id")}`,
+      data: `id=${$verse_to_change.attr("id")}&verse_text=${$verse_to_change.text()}`,
       dataType: "json",
       success: function(data){
         if ( data.not_valid ) {

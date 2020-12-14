@@ -57,18 +57,6 @@ class Word(models.Model):
     def __str__(self):
         return self.word_text
 
-    def is_beg_verses(self):
-        return self.verse_set.filter(is_beg=True).count()
-
-    def is_int_verses(self):
-        return self.verse_set.filter(is_int=True).count()
-
-    def is_end_verses(self):
-        return self.verse_set.filter(is_end=True).count()
-
-    def is_beg_end_verses(self):
-        return self.verse_set.filter(is_beg=True, is_end=True)
-
 
 class Verse(models.Model):
     verse_text = models.TextField()

@@ -1,5 +1,10 @@
-body {
-  background-color: #1136;
+html body {
+  background: none repeat scroll 0 0 #131520;
+  color: #f9f9fa;
+}
+
+.jumbotron {
+  background-color: #232627;
 }
 
 .oi {
