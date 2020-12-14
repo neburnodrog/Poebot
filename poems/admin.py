@@ -22,7 +22,7 @@ class WordAdmin(admin.ModelAdmin):
 
 
 class VerseAdmin(admin.ModelAdmin):
-    list_display = ('id', 'verse_text', 'verse_length', "date_of_creation", "modified_date")
+    list_display = ('id', 'verse_text', 'verse_length', "last_word", "is_beg", "is_int", "is_end", "date_of_creation", "modified_date")
     search_fields = ("verse_text",)
 
 
