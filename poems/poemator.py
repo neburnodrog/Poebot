@@ -41,7 +41,7 @@ class PoemAutomator:
     @length_of_verses.setter
     def length_of_verses(self, value: str) -> None:
         if not value:
-            a, b = random.randint(4, 14), random.randint(4, 14)
+            a, b = random.randint(5, 14), random.randint(5, 14)
             self._length_of_verses = range(a, b) if a < b else range(b, a)
 
         elif "_" in value:
