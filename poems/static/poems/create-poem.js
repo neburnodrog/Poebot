@@ -66,12 +66,11 @@ $(document).ready(function () {
     // TODO https://getbootstrap.com/docs/4.1/components/collapse/#example
 
     let seqList = uniqueRhymes();
-    $( "<div></div>" ).addClass("col-1").appendTo($hiddenForm);
-    $( "<div></div>" ).addClass("col-10").attr("id", "containerCol").appendTo($hiddenForm);
+    $( "<div></div>" ).addClass("col").attr("id", "containerCol").appendTo($hiddenForm);
     $( "<div></div>" ).addClass("row").attr("id", "containerRow").appendTo($("#containerCol"))
     for (i = 0; i < seqList.length; i++) {
        var $div = $( "<div></div>" );
-       $div.addClass( "col-6" ).appendTo( $( "#containerRow" ) );
+       $div.addClass( "col-" ).appendTo( $( "#containerRow" ) );
        let seqKey = seqList[i];
 
        if (isUpperCase(seqKey)) {
@@ -100,7 +99,6 @@ $(document).ready(function () {
                         .text("Aquí una rima asonante o una palabra. Ejemplo: '-aa' para rimar asonantemente con 'naranja'. Si no la palabra directamente: 'muerte'"));
        }
     }
-    $( "<div></div>" ).addClass("col-1").appendTo($hiddenForm);
 
     let $rhyValid = $(".rhyme_validator");
     $rhyValid.change(function() {
@@ -290,7 +288,7 @@ $(document).ready(function () {
       validInvalid( $( this ), message, valid=true ); /* Tiene buena pinta */
 
     } else {
-      message = "El valor ha de ser un número entero positivo entre 5 y 19"
+      message = "El valor ha de ser un número entero positivo entre 5 y 14"
       validInvalid( $( this ), message, valid=false );
     };
   });

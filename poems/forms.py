@@ -1,6 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from poems.help_funcs import sequence_without_spaces
 
 
 class CreatePoemForm(forms.Form):
@@ -14,11 +12,11 @@ class CreatePoemForm(forms.Form):
     )
 
     verse_length = forms.IntegerField(
-        help_text="Medidos en número de sílabas (Mínimo 5 y máximo 19).",
+        help_text="Medidos en número de sílabas (Mínimo 5 y máximo 14).",
         label="Longitud de los versos",
         required=False,
         min_value=5,
-        max_value=19,
+        max_value=14,
     )
 
     rhy_seq = forms.CharField(

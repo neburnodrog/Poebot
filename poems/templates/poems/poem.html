@@ -3,33 +3,26 @@
 {% block title %}Poem{% endblock %}
 
 {% block jumbo %}
-<div class="container">
+<div id="poem" class="container">
 
 
-    <div class="row">
-          <div class="col-6">
-            <div class="btn btn-dark btn-sm" id="reload">Refrescar esta configuración</div>
-          </div>
-          <div class="col-6">
-            <a href="{% url 'poems:create_poem' %}"><div class="btn btn-dark btn-sm">Generar nuevo poema</div></a>
-          </div>
-    </div><br><br><br>
+    <br>
 
             {% for verse in object_list %}
 
                       {% if verse %}
                       <div class="row">
-                          <div class="col-1 text"></div>
-                        <div class="col text-left"><span id="{{verse.id}}" name="verse_id" class="verse">{{ verse.verse_text }}</span></div>
-                        <div class="col-1">
+                          <div class="col-3 d-none d-sm-block my-auto"></div>
+                        <div class="col text-left"><p id="{{verse.id}}" name="verse_id" class="verse ver_num_{{forloop.counter}}">{{ verse.verse_text }}</p></div>
+                        <div class="col-1 d-sm-block my-auto">
                               <span class="oi oi-loop-circular" title="icon loop-circular"></span>
                         </div>
 
                       {% else %}
                       <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-8"><br></div>
-                        <div class="col-2"></div>
+
+                        <div class="col"><br></div>
+
 
                       {% endif %}
                     </div>
@@ -39,8 +32,15 @@
 
             {% endfor %}
 
-    <br><br>
-
+    <br><br><br>
+    <div class="row">
+          <div class="col-6">
+            <div class="btn btn-dark btn-sm" id="reload">Refrescar</div>
+          </div>
+          <div class="col-6">
+            <a href="{% url 'poems:create_poem' %}"><div class="btn btn-dark btn-sm">Otro Poema</div></a>
+          </div>
+    </div>
 </div>
 {% endblock %}
 
