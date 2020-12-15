@@ -1,4 +1,14 @@
-html { font-size: calc(0.55rem + 1vw) }
+html {
+  font-size: calc(0.55rem + 1vw)
+}
+
+body {
+  background-color: #131520;
+}
+
+.jumbotron {
+  background-color: #232627;
+}
 
 .oi {
   padding: 2px;
@@ -16,8 +26,13 @@ svg {
   background-color: #e9ecef;
 }
 
+h1 {
+  color: rgb(209, 205, 199);
+}
+
 p {
   margin: 2px;
+  color: rgb(209, 205, 199);
 }
 
 /*
