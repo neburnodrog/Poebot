@@ -12,7 +12,7 @@ class CreatePoemForm(forms.Form):
     )
 
     verse_length = forms.IntegerField(
-        help_text="Medidos en número de sílabas (mínimo 5 y máximo 14).",
+        help_text="Medidos en número de sílabas <br>(mínimo 5 y máximo 14).",
         label="Longitud de los versos",
         required=False,
         min_value=5,
@@ -20,7 +20,10 @@ class CreatePoemForm(forms.Form):
     )
 
     rhy_seq = forms.CharField(
-        help_text="Mayúsculas: rima consonante. Minúsculas: asonante. <br>Espacio(s) en blanco: verso en blanco. Ejemplo: ABBA ABBA",
+        help_text="Ejemplo: ABBA ABBA.<br>"
+                  "Mayúsculas: rima consonante.<br> "
+                  "Minúsculas: rima asonante. <br>"
+                  "Espacio en blanco: verso en blanco.",
         label="Secuencia de rimas",
         required=False,
     )
