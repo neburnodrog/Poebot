@@ -5,14 +5,14 @@ class CreatePoemForm(forms.Form):
 
     ver_num = forms.IntegerField(
         label="Número de versos",
-        help_text="Este campo requiere un entero positivo menor o igual a 20 para germinar.",
+        help_text="Este campo requiere de un número entero positivo menor o igual a 20 para germinar.",
         required=False,
         min_value=1,
         max_value=20,
     )
 
     verse_length = forms.IntegerField(
-        help_text="Medidos en número de sílabas (Mínimo 5 y máximo 14).",
+        help_text="Medidos en número de sílabas (mínimo 5 y máximo 14).",
         label="Longitud de los versos",
         required=False,
         min_value=5,
