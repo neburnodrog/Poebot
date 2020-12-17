@@ -1,8 +1,8 @@
-
 $(document).ready(function () {
 
   const $verses = $( ".verse" );
   const verse_stacks = {};
+
   $verses.each(function () {
     ver_num = $(this).attr("class").split(" ")[1];
     verse_stacks[ver_num] = [];
@@ -52,12 +52,12 @@ $(document).ready(function () {
 
   $(".oi").click( function () {
     var $verse_to_change = $(this).parent().prev().children();
-    var verse_id = $verse_to_change.attr("id");
-    var verse_text = $verse_to_change.text();
-    var verse_num = $verse_to_change.attr("class").split(" ")[1];
-    verse_stacks[verse_num].push({
-      "id": verse_id,
-      "verse_text": verse_text,
+    var old_verse_id = $verse_to_change.attr("id");
+    var old_verse_text = $verse_to_change.text();
+    var old_verse_num = $verse_to_change.attr("class").split(" ")[1];
+    verse_stacks[old_verse_num].push({
+      "id": old_verse_id,
+      "verse_text": old_verse_text,
     });
 
     $.ajax({

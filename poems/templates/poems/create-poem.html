@@ -11,7 +11,8 @@
 
         <div class="col-12">
           <div class="form-group">
-              {{ field.label_tag }}{{ field }}
+              {{ field.label_tag }}
+              {{ field }}
               {% if field.errors %}
                     {% for error in field.errors %}
                         <div class="invalid-feedback">
@@ -45,17 +46,18 @@
       </div>
 
     <br>
-      <div id="hidden" class="form-group" style="display:none;">
-       <div class="container">
-         <div class="row">
-           <div class="col-12">
-              <h5 class="text-center">Especifica las rimas</h5>
-           </div>
-        </div>
-         <div class="row" id="hidden-form">
-           <br>
-         </div>
-       </div>
+      <div id="hidden" class="row" style="display:none;">
+          <div class="col">
+              <div class="row">
+                  <div class="col-12">
+                  <p class="lead text-center pb-2">Especifica las rimas:</p>
+                  </div>
+              </div>
+              <div class="row" id="hidden-form">
+
+              </div>
+
+          </div>
       </div>
 
         <input class="btn btn-light btn-sm" type="submit" name='submit' value="Generar poema">

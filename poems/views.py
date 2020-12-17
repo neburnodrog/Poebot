@@ -27,10 +27,16 @@ class CreatePoemView(FormView):
             form = CreatePoemForm(self.request.GET)
             if form.is_valid():
                 query_string = urlencode(form.data, ascii)
-                return HttpResponseRedirect(reverse_lazy("poems:poem") + "?" + query_string)
+                return HttpResponseRedirect(
+                    reverse_lazy("poems:poem") + "?" + query_string
+                )
             return self.form_invalid(form)
 
-        return render(self.request, self.get_template_names(), context=self.get_context_data())
+        return render(
+            self.request,
+            self.get_template_names(),
+            context=self.get_context_data()
+        )
 
 
 def validate_rhyme(request):
@@ -43,45 +49,55 @@ def validate_rhyme(request):
             rhy_seq_value = request.GET.get(key)
         else:
             rhyme_code = key
-            rhyme_val = request.GET.get(rhyme_code)
+            rhyme_val = request.GET.get(rhyme_code).lower()
 
-    if rhyme_code == rhyme_code.upper():  # Key is UPPERCASE -> consonant_rhyme checker
+    # Key is UPPERCASE -> consonant_rhyme checker
+    if rhyme_code == rhyme_code.upper():
         if rhyme_val.startswith("-"):
             rhyme_val = rhyme_val.strip("-")
         else:
-            rhyme_val = Syllabifier(rhyme_val).consonant_rhyme  # This to be able to input either a word & an ending
+            # This to be able to input either a word & an ending
+            rhyme_val = Syllabifier(rhyme_val).consonant_rhyme
 
         try:
             cons_obj = ConsonantRhyme.objects.get(consonant_rhyme=rhyme_val)
         except ConsonantRhyme.DoesNotExist:
+            err_msg = "Esta rima no existe en la base de datos por el momento."
             data = {"not_valid": True,
-                    "error_message": "Esta rima no existe en la base de datos por el momento."}
+                    "error_message": err_msg}
 
             return JsonResponse(data)
 
         verses_count = cons_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
         words_count = set(verses_count)
 
-    else:  # Key is LOWERCASE -> assonant_rhyme checker
+    # Key is LOWERCASE -> assonant_rhyme checker
+    else:
         if rhyme_val.startswith("-"):
             rhyme_val = rhyme_val.strip("-")
         else:
-            rhyme_val = Syllabifier(rhyme_val).assonant_rhyme  # This to be able to input either a word & an ending
+            # This to be able to input either a word & an ending
+            rhyme_val = Syllabifier(rhyme_val).assonant_rhyme
 
         try:
             asson_obj = AssonantRhyme.objects.get(assonant_rhyme=rhyme_val)
         except AssonantRhyme.DoesNotExist:
+            err_msg = "Esta rima no existe en la base de datos por el momento."
             data = {"not_valid": True,
-                    "error_message": "Esta rima no existe en la base de datos por el momento."}
+                    "error_message": err_msg}
             return JsonResponse(data)
 
         verses_count = asson_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
         words_count = set(verses_count)
 
-    if (len(verses_count) < 2 * rhy_seq_value.count(rhyme_code)
-        or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)):
+    if (
+        len(verses_count) < 2 * rhy_seq_value.count(rhyme_code)
+        or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)
+    ):
+        error_message = "No hay rimas suficientes de este tipo\
+        en la base de datos para continuar."
         data = {"not_valid": True,
-                "error_message": "No hay rimas suficientes de este tipo en la base de datos para continuar."}
+                "error_message": error_message}
 
     return JsonResponse(data)
 
@@ -127,11 +143,19 @@ def change_verse(request):
         "is_int",
         "is_end",)[0]
 
-    if possible_verses := Verse.objects.values_list("id").filter(**values_dict).exclude(id=verse_id):
+    if possible_verses := Verse.objects.values_list("id").filter(
+        **values_dict
+    ).exclude(id=verse_id):
         # TODO -> send the full list and let JS handle the stack.
         new_id = random.choice(possible_verses)[0]
         data = Verse.objects.values("id", "verse_text").get(id=new_id)
     else:
         data = {"not_valid": True}
 
+    return JsonResponse(data)
+
+
+def get_rhyme(request):
+    rhyme = request.GET.get("rhyme")
+    data = {"rhymes_with": rhyme}
     return JsonResponse(data)

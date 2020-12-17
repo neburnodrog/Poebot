@@ -29,8 +29,6 @@ class CreatePoemForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        super(CreatePoemForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'form-control'
-            if visible == "ver_num":
-                visible.field.widget.attrs['onkeydown'] = "return event.keyCode !== 69"
+            visible.field.widget.attrs['class'] = 'form-control text-center'
