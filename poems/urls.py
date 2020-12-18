@@ -10,5 +10,4 @@ urlpatterns = [
     path("poema/", views.PoemView.as_view(), name="poem"),
     path("validate/", views.validate_rhyme, name="validate_rhyme"),
     path("change_verse/", views.change_verse, name="change_verse"),
-    path("get_rhyme/", views.get_rhyme, name="get_rhyme"),
 ]

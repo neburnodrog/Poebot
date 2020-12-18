@@ -153,9 +153,3 @@ def change_verse(request):
         data = {"not_valid": True}
 
     return JsonResponse(data)
-
-
-def get_rhyme(request):
-    rhyme = request.GET.get("rhyme")
-    data = {"rhymes_with": rhyme}
-    return JsonResponse(data)

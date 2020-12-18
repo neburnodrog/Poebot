@@ -1,9 +1,11 @@
 import random
 from re import finditer
-from typing import Union, Optional, List, Dict, Iterable
-from django.db.models import QuerySet
+from typing import Union, Optional, List, Dict
+
 from poems.analyse_verses import Syllabifier
 from poems.models import Verse, AssonantRhyme, ConsonantRhyme, Word
+
+from django.db.models import QuerySet
 
 
 class PoemAutomator:
