@@ -1,13 +1,6 @@
 import random
 from re import finditer
 from typing import Union, Optional, List, Dict, Iterable
-################
-import os
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "poemautomator.settings")
-django.setup()
-#################
 from django.db.models import QuerySet
 from poems.analyse_verses import Syllabifier
 from poems.models import Verse, AssonantRhyme, ConsonantRhyme, Word
@@ -208,23 +201,32 @@ class RhymeSequence:
         unique_rhymes = self.unique_rhymes_keys
 
         for key in unique_rhymes:
-            limit = self.clean_rhyme_sequence.count(key) * 2  # TODO lower this value to use stranger rhymes
+            word_limit = self.clean_rhyme_sequence.count(key) * 2  # TODO lower this value to use stranger rhymes
+            verse_limit = word_limit * 3
 
             if key == key.upper():  # if capital letter -> consonant rhyme
-                words = Word.objects.values_list("consonant_rhyme_id").filter(
-                    amount_verses__gte=limit,
-                    consonant_rhyme__amount_words__gte=limit
+                cons_ids = ConsonantRhyme.objects.values_list("id").filter(
+                    amount_verses__gte=verse_limit,
+                    amount_words__gte=word_limit,
                 )
-                cons_rhy_id = random.choice(words)[0]
+
+                cons_rhy_id = random.choice(cons_ids)[0]
                 rhyme_object = ConsonantRhyme.objects.get(id=cons_rhy_id)
+                while rhyme_object in rhyme_set.values():
+                    cons_rhy_id = random.choice(cons_ids)[0]
+                    rhyme_object = ConsonantRhyme.objects.get(id=cons_rhy_id)
 
             else:  # Assonant
-                words = Word.objects.values_list("assonant_rhyme_id").filter(
-                    amount_verses__gte=limit,
-                    assonant_rhyme__amount_words__gte=limit
+                asson_ids = AssonantRhyme.objects.values_list("id").filter(
+                    amount_verses__gte=verse_limit,
+                    amount_words__gte=word_limit
                 )
-                asson_rhy_id = random.choice(words)[0]
+
+                asson_rhy_id = random.choice(asson_ids)[0]
                 rhyme_object = AssonantRhyme.objects.get(id=asson_rhy_id)
+                while rhyme_object in rhyme_set.values():
+                    asson_rhy_id = random.choice(asson_ids)[0]
+                    rhyme_object = AssonantRhyme.objects.get(id=asson_rhy_id)
 
             rhyme_set[key] = rhyme_object
 
