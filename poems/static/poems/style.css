@@ -1,0 +1,61 @@
+html {
+  font-size: calc(0.55rem + 1vw);
+}
+
+body {
+  background-color: #020c15;
+}
+
+nav {
+  background-color: #020c15;
+}
+
+.jumbotron {
+    border-radius:5px;
+    background-color: #0f3a48;
+}
+
+#poebot-logo {
+    width: calc(80px + 1vw);
+}
+
+.oi {
+  padding: 2px;
+  border-radius: 5px;
+  background-color:white;
+}
+
+svg {
+  padding: 2px;
+  border-radius: 5px;
+  background-color: white;
+}
+
+label, h1 {
+  color: rgb(209, 205, 199);
+}
+
+p {
+  margin: 2px;
+  color: rgb(209, 205, 199);
+}
+
+/*
+Extra small devices (portrait phones, less than 544px)
+No media query since this is the default in Bootstrap because it is "mobile first"
+*/
+/* h1 {
+  font-size: 32px;
+  font-size: 6vw;
+} */
+
+/* @media (min-width: 544px) {
+h1 {
+  font-size: 42px;
+  font-size: 3.5vw;
+}
+@media (min-width: 544px) {
+p {
+    font-size: 16px;
+    font-size: 1.5vw;
+} */

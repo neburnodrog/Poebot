@@ -81,6 +81,6 @@ database_clena_funcs/design.odt
 # Personal
 database_clean_funcs/
 backup/
-static/
+/static
 poems/tests/
 poemautomator/local_settings.py
