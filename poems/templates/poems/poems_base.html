@@ -23,22 +23,22 @@
   <div class="container">
 
     <nav class="navbar navbar-expand navbar-dark">
-      <a class="navbar-brand" href="{% url 'poems:create_poem' %}">Poebot</a>
+      <a class="navbar-brand" href="{% url 'poems:create_poem' %}"><img src="{% static 'poems/poebot.png' %}" id="poebot-logo" alt="Poebot"></a>
           <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="{% url 'poems:home' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'poems:home' %}">Inicio</a></li>
             <li class="nav-item"><a class="nav-link" href="{% url 'poems:create_poem' %}">Poema</a></li>
-            <li class="nav-item"><a class="nav-link disabled" tabindex="-1" aria-disabled="true" href="#">About</a></li>
+            <li class="nav-item"><a class="nav-link disabled" tabindex="-1" aria-disabled="true" href="#">Sobre mi</a></li>
           </ul>
     </nav>
 
 
     <div class="jumbotron py-4 text-center">
-        <h1>Poebot</h1>
-        <hr>
+        <img src="{% static 'poems/poebot.png' %}" alt="Poebot" class="img-fluid" width="70%">
         <br>
-        {% block jumbo%}{% endblock%}
 
+        {% block jumbo%}{% endblock%}
     </div>
+
 
     {% block content %}{% endblock %}
 

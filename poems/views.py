@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 import random
 
-
 from django.views.generic import ListView, FormView
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -54,7 +53,9 @@ def validate_rhyme(request):
     # Key is UPPERCASE -> consonant_rhyme checker
     if rhyme_code == rhyme_code.upper():
         if rhyme_val.startswith("-"):
-            rhyme_val = rhyme_val.strip("-")
+            table = str.maketrans({"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", })
+            rhyme_val = rhyme_val.translate(table).strip("-")
+
         else:
             # This to be able to input either a word & an ending
             rhyme_val = Syllabifier(rhyme_val).consonant_rhyme
@@ -74,7 +75,9 @@ def validate_rhyme(request):
     # Key is LOWERCASE -> assonant_rhyme checker
     else:
         if rhyme_val.startswith("-"):
-            rhyme_val = rhyme_val.strip("-")
+            table = str.maketrans({"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", })
+            rhyme_val = rhyme_val.translate(table).strip("-")
+
         else:
             # This to be able to input either a word & an ending
             rhyme_val = Syllabifier(rhyme_val).assonant_rhyme
@@ -87,12 +90,16 @@ def validate_rhyme(request):
                     "error_message": err_msg}
             return JsonResponse(data)
 
-        verses_count = asson_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
-        words_count = set(verses_count)
+        if ver_len_value:
+            verses = asson_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+        else:
+            verses = asson_obj.verse_set.values_list("last_word_id")
+
+        words_count = set(verses)
 
     if (
-        len(verses_count) < 2 * rhy_seq_value.count(rhyme_code)
-        or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)
+            len(verses) < 2 * rhy_seq_value.count(rhyme_code)
+            or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)
     ):
         error_message = "No hay rimas suficientes de este tipo\
         en la base de datos para continuar."
@@ -141,10 +148,10 @@ def change_verse(request):
         "consonant_rhyme",
         "is_beg",
         "is_int",
-        "is_end",)[0]
+        "is_end", )[0]
 
     if possible_verses := Verse.objects.values_list("id").filter(
-        **values_dict
+            **values_dict
     ).exclude(id=verse_id):
         # TODO -> send the full list and let JS handle the stack.
         new_id = random.choice(possible_verses)[0]

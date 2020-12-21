@@ -1,3 +1,4 @@
+
 {% extends 'poems/poems_base.html' %}
 {% load static %}
 {% block title %}Create Poem{% endblock %}
@@ -6,61 +7,44 @@
 <div class="container">
   <form method="get">
 
-      <div class="row">
       {% for field in form %}
-
-        <div class="col-12">
-          <div class="form-group">
-              {{ field.label_tag }}
-              {{ field }}
-              {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div class="invalid-feedback">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-              {% else %}
+          <div class="row justify-content-center">
+            <div class="col-auto col-sm-8">
+              <div class="form-group">
+                  {{ field.label_tag }}
+                  {{ field }}
                     {% if field.help_text %}
                         <small class="form-text text-muted">{{ field.help_text|safe }}</small>
                     {% endif %}
-              {% endif %}
-        </div>
+            </div>
           </div>
-
-            <br>
+        </div>
       {% endfor %}
 
-
-        <div class="col-12">
-          <div class="form-group">
-            <label for="id_select_verses" style="display:none;">Quieres elegir las rimas?</label>
-            <select class="form-select" id="id_select_verses" style="display:none;">
-              <option value="no">No</option>
-              <option value="yes">Sí</option>
-              <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->
-            </select>
+      <div class="row justify-content-center">
+          <div class="col-auto">
+            <div class="form-group">
+              <label for="id_select_verses" style="display:none;">Quieres elegir las rimas?</label>
+              <select class="form-control text-center" id="id_select_verses" style="display:none;">
+                <option value="no">No</option>
+                <option value="yes">Sí</option>
+                <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->
+              </select>
+            </div>
           </div>
-            <br>
-        </div>
-
       </div>
 
-    <br>
       <div id="hidden" class="row" style="display:none;">
-          <div class="col">
-              <div class="row">
-                  <div class="col-12">
-                  <p class="lead text-center pb-2">Especifica las rimas:</p>
-                  </div>
-              </div>
-              <div class="row" id="hidden-form">
+          <div class="col-12">
+          <p class="lead text-center pb-2">Especifica las rimas:</p>
+          </div>
 
-              </div>
-
+          <div class="col-12" id="hidden-form">
           </div>
       </div>
 
-        <input class="btn btn-light btn-sm" type="submit" name='submit' value="Generar poema">
+      <input class="btn btn-light btn-sm" i d="submit" type="submit" name='submit' value="Generar poema">
+
   </form>
 </div>
 

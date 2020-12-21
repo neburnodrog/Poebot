@@ -1,5 +1,5 @@
 html {
-  font-size: calc(0.55rem + 1vw)
+  font-size: calc(0.55rem + 1vw);
 }
 
 body {
@@ -11,7 +11,12 @@ nav {
 }
 
 .jumbotron {
-  background-color: #0f3a48;
+    border-radius:5px;
+    background-color: #0f3a48;
+}
+
+#poebot-logo {
+    width: calc(80px + 1vw);
 }
 
 .oi {
@@ -26,10 +31,6 @@ svg {
   background-color: white;
 }
 
-#last_arrow {
-  background-color: #e9ecef;
-}
-
 label, h1 {
   color: rgb(209, 205, 199);
 }
@@ -37,10 +38,6 @@ label, h1 {
 p {
   margin: 2px;
   color: rgb(209, 205, 199);
-}
-
-.input-group-text {
-  border: 0px;
 }
 
 /*
