@@ -1,4 +1,4 @@
-$(document).ready(function () {
+
 
 //## VARIABLES ##//
     const asson_words = [
@@ -182,28 +182,28 @@ $(document).ready(function () {
   }
 
 
-    function validInvalid( inputent, msg, valid ) {
+    function validInvalid( inputElem, msg, valid ) {
         if (valid) {
-            inputent.removeClass("is-invalid").addClass("is-valid");
+            inputElem.removeClass("is-invalid").addClass("is-valid");
         } else {
-            inputent.removeClass("is-valid").addClass("is-invalid");
+            inputElem.removeClass("is-valid").addClass("is-invalid");
         }
 
-        if ( inputent.next().length === 0 ) {
-            inputent.parent().append("<small></small>");
+        if ( inputElem.next().length === 0 ) {
+            inputElem.parent().append("<small></small>");
         }
 
-        if ( inputent.hasClass( "is-valid" ) ) {
-            inputent.next() //small>
-                            .removeClass( "text-muted invalid-feedback" )
-                            .addClass( "valid-feedback" )
-                            .text( msg );
-        } else if ( inputent.hasClass( "is-invalid" ) ) {
-            inputent.next()
-                          .removeClass( "text-muted valid-feedback" )
-                          .addClass( "invalid-feedback" )
-                          .text ( msg );
+        small = inputElem.next().removeClass("text-muted");
+
+        if ( inputElem.hasClass( "is-valid" ) ) {
+            small.removeClass( "invalid-feedback" )
+                .addClass( "valid-feedback" );
+        } else if ( inputElem.hasClass( "is-invalid" ) ) {
+            small.removeClass( "valid-feedback" )
+               .addClass( "invalid-feedback" );
         }
+
+        small.text(msg);
     }
 
 
@@ -226,8 +226,27 @@ $(document).ready(function () {
         }
     }
 
-
+$(document).ready(function () {
 // LOGIC AND LISTENERS
+    $(".popover").each(function () {
+        let text = $(this).parent().prev()
+                    .children().eq(0).children()
+                    .eq(0).text();
+        if (text === "Número de versos:") {
+            var message = "Este campo requiere de un número entero positivo menor o igual a 20 para germinar.";
+            var where = "top";
+        } else if (text === "Longitud de los versos:") {
+            var message = "Medidos en número de sílabas (mínimo 5 y máximo 14).";
+            var where = "top";
+        } else {
+            var message = "Ejemplo: ABBA ABBA.\nMayúsculas: rima consonante.\n Minúsculas: rima asonante.\n Espacio en blanco: verso en blanco.";
+            var where = "bottom";
+        }
+
+        $(this).attr("data-placement", where).attr("data-content", message);
+    })
+
+    $('[data-toggle="popover"]').popover()
 
     if ( $rhySeq.val() !== "" ) {
         showSelect($selVer);
@@ -246,10 +265,10 @@ $(document).ready(function () {
             if ( 0 < verNumVal && verNumVal < 21 ) {
                 validInvalid( $( this ), "Esto tiene buena pinta.", valid=true );/* Tiene buena pinta */
             } else if ( verNumVal === "" ) {
-                message = "En blanco se generan un número aleatorio de versos."
+                message = "Se generan un número aleatorio de versos."
                 validInvalid( $( this ), message, valid=true );
             } else {
-                error_message = "El valor de la casilla ha de ser un número entero positivo menor o igual a 20.";
+                error_message = "Sólo números. Min: 1, Max: 20"
                 validInvalid( $( this ), error_message, valid=false );
             }
 
@@ -262,10 +281,10 @@ $(document).ready(function () {
 
     $verLen.on(
         "change, blur", function() {
-            let verLenVal = $( this ).val();
+            let verLenVal = Number ( $( this ).val() );
 
             if ( verLenVal === "") {
-                message = "Si dejas este valor en blanco se generarán versos de tamaño variable y aleatorio"
+                message = "Se generarán versos de tamaño aleatorio"
                 validInvalid( $( this ), message, valid=true );
 
             } else if ( 4 < verLenVal && verLenVal < 20 ) {
@@ -273,8 +292,8 @@ $(document).ready(function () {
                 validInvalid( $( this ), message, valid=true ); /* Tiene buena pinta */
 
             } else {
-                message = "El valor ha de ser un número entero positivo entre 5 y 14"
-                validInvalid( $( this ), message, valid=false );
+                error_message = "Sólo números. Min: 5, Max: 14"
+                validInvalid( $( this ), error_message, valid=false );
             };
         }
     );
@@ -292,11 +311,11 @@ $(document).ready(function () {
 
 
     $rhySeq.on(
-        "change blur focus", function() {
+        "change blur", function() {
             let verNumVal = Number($verNum.val());
 
             if ( $( this ).val() === "" ) {
-                validInvalid( $( this ), "Si dejas esta celda en blanco se generarán versos aleatorios", valid=true );
+                validInvalid( $( this ), "Si dejas esta celda en blanco se generarán versos sin rima", valid=true );
 
             //IF NOT ALL CHARACTERS MATCH THE REGEX -> ERROR
             } else if ( /^[a-zA-ZñÑ\s]+$/.test( $( this ).val() ) === false ) {

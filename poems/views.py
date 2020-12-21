@@ -151,7 +151,7 @@ def change_verse(request):
         "is_end", )[0]
 
     if possible_verses := Verse.objects.values_list("id").filter(
-            **values_dict
+        **values_dict
     ).exclude(id=verse_id):
         # TODO -> send the full list and let JS handle the stack.
         new_id = random.choice(possible_verses)[0]
