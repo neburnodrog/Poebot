@@ -321,7 +321,9 @@ $(document).ready(function () {
         $(this).attr("data-placement", where).attr("data-content", message);
     })
 
-    $('[data-toggle="popover"]').popover()
+    $('[data-toggle="popover"]').popover({
+        trigger: "focus"
+    })
 
     verNumOnLoad();
     verLenOnLoad();
