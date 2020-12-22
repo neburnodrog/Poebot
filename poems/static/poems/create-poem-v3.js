@@ -383,31 +383,32 @@ $(document).ready(function () {
     );
 
 
-    $selVer.change(function() {
-        if ( $(this).val() === 'yes' ) {
-             if ( $rhySeq.hasClass( "is-valid" ) ) {
-                   if ( $(this).hasClass("is-invalid") ) {;
-                         validInvalid( $(this), "", valid=true);
-                   }
-                   createFormDinamically();
-             } else {
-                   let error_message = "La secuencia de rimas ha de ser válida.";
-                   validInvalid( $(this), error_message, valid=false );
-             };
-        } else {
-            $( $hidden ).hide();
-        };
-    });
+    $selVer.change(
+        function() {
+            if ( $(this).val() === 'yes' ) {
+                 if ( $rhySeq.hasClass( "is-valid" ) ) {
+                       if ( $(this).hasClass("is-invalid") ) {;
+                             validInvalid( $(this), "", valid=true);
+                       }
+                       $hidden.show();
 
-    $submit.submit(
-        function(event) {
-            if ( $(".is-invalid").length == 0 ) {
-                console.log("submiting")
+                 } else {
+                       let error_message = "La secuencia de rimas ha de ser válida.";
+                       validInvalid( $(this), error_message, valid=false );
+                 };
             } else {
-                console.log("not submiting")
-                event.preventDefault;
-            }
+                $hidden.hide();
+            };
         }
     );
 
+
+    $("form").submit(
+        function(event) {
+            if ( $(".is-invalid").length > 0 ) {
+                alert("Todavía hay valores incorrectos")
+                event.preventDefault();
+            }
+        }
+    );
 });
