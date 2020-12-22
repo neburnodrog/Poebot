@@ -53,7 +53,7 @@ def validate_rhyme(request):
     # Key is UPPERCASE -> consonant_rhyme checker
     if rhyme_code == rhyme_code.upper():
         if rhyme_val.startswith("-"):
-            table = str.maketrans({"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", })
+            table = str.maketrans({k: v for k, v in zip("áéíóú", "aeiou")})
             rhyme_val = rhyme_val.translate(table).strip("-")
 
         else:
@@ -69,8 +69,12 @@ def validate_rhyme(request):
 
             return JsonResponse(data)
 
-        verses_count = cons_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
-        words_count = set(verses_count)
+        if ver_len_value:
+            verses = cons_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+        else:
+            verses = cons_obj.verse_set.values_list("last_word_id")
+
+        words_count = set(verses)
 
     # Key is LOWERCASE -> assonant_rhyme checker
     else:
