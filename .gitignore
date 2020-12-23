@@ -24,6 +24,9 @@ media
 .idea/**/libraries
 *.iws /out/
 
+# VSCode #
+/.vscode
+
 # Python #
 *.py[cod]
 *$py.class

@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+
 $(document).ready(function () {
 
     // jQuery SELECTOR variables
@@ -6,8 +8,8 @@ $(document).ready(function () {
     const $hidden = $("#hidden");
     const $verLen = $("#id_verse_length");
     const $verNum = $("#id_ver_num");
-    const $selVer = $( '#id_select_verses' );
-    const $submit = $( "#submit" );
+    const $selVer = $('#id_select_verses');
+    const $submit = $("#submit");
 
 
     //## VARIABLES ##//
@@ -55,7 +57,7 @@ $(document).ready(function () {
 
 
     /*## FUNCTIONS ##*/
-    function choose_message( rhyme_type ) {
+    function choose_message(rhyme_type) {
         if (rhyme_type === "consonante") {
             word = conson_words[Math.floor(Math.random() * conson_words.length)];
         } else {
@@ -65,11 +67,10 @@ $(document).ready(function () {
     }
 
 
-    function uniqueChar( rhymeSequence ) {
+    function uniqueChar(rhymeSequence) {
         let uniqueValuesArray = [];
         for (let i = 0; i < rhymeSequence.length; i++) {
-            if ( uniqueValuesArray.includes(rhymeSequence[i]) ) {
-            } else {
+            if (uniqueValuesArray.includes(rhymeSequence[i])) { } else {
                 uniqueValuesArray.push(rhymeSequence[i]);
             }
         }
@@ -77,7 +78,7 @@ $(document).ready(function () {
     }
 
 
-    function uniqueRhymes( rhymeSequenceString ) {
+    function uniqueRhymes(rhymeSequenceString) {
         /* return it as array without the whitespaces */
         let rhySequenceArray = rhymeSequenceString
             .split(' ')
@@ -87,46 +88,45 @@ $(document).ready(function () {
     }
 
 
-    function createInput( rhymeKey, rhymeType ) {
+    function createInput(rhymeKey, rhymeType) {
         let input = $(
-            "<input>",
-            {
-                type:"text",
-                class:"form-control rhyme_validator",
-                name: rhymeKey,
-                id: rhymeKey,
-                required: true,
-            }
+            "<input>", {
+            type: "text",
+            class: "form-control rhyme_validator",
+            name: rhymeKey,
+            id: rhymeKey,
+            required: true,
+        }
         );
 
         input.keyup(
-            function() {
+            function () {
                 if ($(this).val() === "") {
-                    resetToNeutral( $(this), choose_message(rhymeType) );
+                    resetToNeutral($(this), choose_message(rhymeType));
                 }
             }
         );
 
         input.change(
-            function() {
+            function () {
                 rhyme_input = $(this);
-                if ( /^-?[a-zA-ZñÑÓóÁáÉéíÍúÚü]+$/.test( rhyme_input.val() ) ) {
+                if (/^-?[a-zA-ZñÑÓóÁáÉéíÍúÚü]+$/.test(rhyme_input.val())) {
                     $.ajax({
                         url: "/validate/",
                         data: `${rhyme_input.serialize()}&${$rhySeq.serialize()}&${$verLen.serialize()}`,
                         dataType: 'json',
-                        success: function(data) {
+                        success: function (data) {
                             if (data.not_valid) {
-                                validInvalid( rhyme_input, data.error_message, valid=false )
+                                validInvalid(rhyme_input, data.error_message, valid = false)
                             } else {
-                                validInvalid( rhyme_input, "Tiene buena pinta", valid=true )
+                                validInvalid(rhyme_input, "Tiene buena pinta", valid = true)
                             }
                         }
                     });
 
                 } else {
                     error_message = "Solo se permiten caracteres alfabéticos y el guión."
-                    validInvalid( rhyme_input, error_message, valid=false );
+                    validInvalid(rhyme_input, error_message, valid = false);
                 }
             }
         );
@@ -135,23 +135,31 @@ $(document).ready(function () {
     }
 
 
-    function createRhymeField ( rhymeKey ) {
-        let $rhymeDivRow = $( "<div>", {class: 'row justify-content-center'})
-        let $rhymeDivCol = $( "<div>", {class: 'col-auto col-sm-8 mb-2'} );
+    function createRhymeField(rhymeKey) {
+        let $rhymeDivRow = $("<div>", {
+            class: 'row justify-content-center'
+        })
+        let $rhymeDivCol = $("<div>", {
+            class: 'col-auto col-sm-8 mb-2'
+        });
 
         let rhymeType;
-        if ( rhymeKey === rhymeKey.toUpperCase() ) {
+        if (rhymeKey === rhymeKey.toUpperCase()) {
             rhymeType = "consonante";
-        } else { rhymeType = "asonante"; }
+        } else {
+            rhymeType = "asonante";
+        }
 
-        let $label = $( "<label>" ).attr("for", rhymeKey).text(`Rima ${rhymeType} ${rhymeKey}:`);
-        let $input = createInput( rhymeKey, rhymeType );
-        let $small = $( "<small>", {class:'form-text text-muted'} )
+        let $label = $("<label>").attr("for", rhymeKey).text(`Rima ${rhymeType} ${rhymeKey}:`);
+        let $input = createInput(rhymeKey, rhymeType);
+        let $small = $("<small>", {
+            class: 'form-text text-muted'
+        })
             .text(choose_message(rhymeType));
 
-        $hiddenForm.append( $rhymeDivRow );
-        $rhymeDivRow.append( $rhymeDivCol );
-        $rhymeDivCol.append( $label, $input, $small );
+        $hiddenForm.append($rhymeDivRow);
+        $rhymeDivRow.append($rhymeDivCol);
+        $rhymeDivCol.append($label, $input, $small);
     }
 
 
@@ -160,7 +168,7 @@ $(document).ready(function () {
 
         let sequenceSet = uniqueRhymes($rhySeq.val());
         for (i = 0; i < sequenceSet.length; i++) {
-            createRhymeField( sequenceSet[i] );
+            createRhymeField(sequenceSet[i]);
         }
     }
 
@@ -179,73 +187,73 @@ $(document).ready(function () {
     }
 
 
-    function validInvalid( inputElem, msg, valid ) {
+    function validInvalid(inputElem, msg, valid) {
         if (valid) {
             inputElem.removeClass("is-invalid").addClass("is-valid");
         } else {
             inputElem.removeClass("is-valid").addClass("is-invalid");
         }
 
-        if ( inputElem.next().length === 0 ) {
+        if (inputElem.next().length === 0) {
             inputElem.parent().append("<small></small>");
         }
 
         small = inputElem.next().removeClass("text-muted");
 
-        if ( inputElem.hasClass( "is-valid" ) ) {
-            small.removeClass( "invalid-feedback" )
-                .addClass( "valid-feedback" );
-        } else if ( inputElem.hasClass( "is-invalid" ) ) {
-            small.removeClass( "valid-feedback" )
-               .addClass( "invalid-feedback" );
+        if (inputElem.hasClass("is-valid")) {
+            small.removeClass("invalid-feedback")
+                .addClass("valid-feedback");
+        } else if (inputElem.hasClass("is-invalid")) {
+            small.removeClass("valid-feedback")
+                .addClass("invalid-feedback");
         }
 
         small.text(msg);
     }
 
-    function resetToNeutral( inputElem, msg ) {
+    function resetToNeutral(inputElem, msg) {
         inputElem.removeClass("is-invalid").removeClass("is-valid");
         small = inputElem.next().removeClass("invalid-feedback")
-                                .removeClass("valid-feedback")
-                                .addClass("text-muted")
-                                .text(msg);
+            .removeClass("valid-feedback")
+            .addClass("text-muted")
+            .text(msg);
     }
 
     function validateRhymesSequence() {
         let verNumVal = $verNum.val();
         let rhySeqVal = $rhySeq.val();
 
-        if (rhySeqVal === ""){
+        if (rhySeqVal === "") {
 
-        } else if ( rhymeSeqIsValid( rhySeqVal, verNumVal ) ) {
+        } else if (rhymeSeqIsValid(rhySeqVal, verNumVal)) {
 
-            validInvalid( $rhySeq, "Tiene buena pinta", true );
+            validInvalid($rhySeq, "Tiene buena pinta", true);
             createFormDinamically();
 
             showSelect();
 
-            if ( $selVer.val() == "yes" ) {
-                validInvalid( $selVer, "", valid=true );
+            if ($selVer.val() == "yes") {
+                validInvalid($selVer, "", valid = true);
                 $($hidden).show();
             }
 
         } else {
 
-            if ( /^[a-zA-ZñÑ\s]+$/.test( rhySeqVal ) == false ) {
+            if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
                 let err_msg = "Solo valen caracteres del abecedario y espacios en blanco";
-                validInvalid( $rhySeq, err_msg, false);
+                validInvalid($rhySeq, err_msg, false);
 
-            } else if ( rhySeqVal.split(" ").join("").length != verNumVal ) {
+            } else if (rhySeqVal.split(" ").join("").length != verNumVal) {
                 let err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)"
-                validInvalid( $rhySeq, err_msg, false );
+                validInvalid($rhySeq, err_msg, false);
             }
         }
     }
 
     function rhymeSeqIsValid(rhySeqVal, verNumVal) {
         if (
-                /^[a-zA-ZñÑ\s]+$/.test( rhySeqVal ) == true
-                && rhySeqVal.split(" ").join("").length == verNumVal
+            /^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
+            rhySeqVal.split(" ").join("").length == verNumVal
         ) {
             return true;
         } else {
@@ -255,7 +263,7 @@ $(document).ready(function () {
 
     function rhySeqOnLoad() {
         if ($rhySeq.val() === "") {
-            resetToNeutral( $rhySeq, "Ejemplo: ABBA ABBA" );
+            resetToNeutral($rhySeq, "Ejemplo: ABBA ABBA");
             $hidden.hide();
             hideSelect();
         } else {
@@ -266,7 +274,7 @@ $(document).ready(function () {
     function verNumIsValid() {
         let verNumVal = $verNum.val();
 
-        if ( 0 < verNumVal && verNumVal < 21 ) {
+        if (0 < verNumVal && verNumVal < 21) {
             return true;
         } else {
             return false;
@@ -274,18 +282,18 @@ $(document).ready(function () {
     }
 
     function verNumOnLoad() {
-        if ( $verNum.val() == "" ) {
+        if ($verNum.val() == "") {
             resetToNeutral($verNum, "Min: 1, Max: 20");
-        } else if ( verNumIsValid() ) {
-            validInvalid($verNum, "Tiene buena pinta.", valid=true);
+        } else if (verNumIsValid()) {
+            validInvalid($verNum, "Tiene buena pinta.", valid = true);
         } else {
-            validInvalid($verNum, "Solo números. Min: 1, Max: 20", valid=false);
+            validInvalid($verNum, "Solo números. Min: 1, Max: 20", valid = false);
         }
     }
 
     function verLenIsValid() {
         let verLenVal = $verLen.val();
-        if ( 4 < verLenVal && verLenVal < 15 ) {
+        if (4 < verLenVal && verLenVal < 15) {
             return true;
         } else {
             return false;
@@ -293,10 +301,10 @@ $(document).ready(function () {
     }
 
     function verLenOnLoad() {
-        if ( $verLen.val() == "" ) {
+        if ($verLen.val() == "") {
             resetToNeutral($verLen, "Min: 5, Max: 14");
-        } else if ( verLenIsValid() ) {
-            validInvalid($verLen, "Tiene buena pinta.", valid=true);
+        } else if (verLenIsValid()) {
+            validInvalid($verLen, "Tiene buena pinta.", valid = true);
         } else {
             validInvalid($verLen, "Solo números. Min: 5, Max: 14");
         }
@@ -305,8 +313,8 @@ $(document).ready(function () {
     // LOGIC AND LISTENERS
     $(".popover").each(function () {
         let text = $(this).parent().prev()
-                    .children().eq(0).children()
-                    .eq(0).text();
+            .children().eq(0).children()
+            .eq(0).text();
         if (text === "Número de versos:") {
             var message = "Un número entre 1 y 20 para que germine un poema. Si se deja en blanco será un número aleatorio de versos.";
             var where = "top";
@@ -330,19 +338,20 @@ $(document).ready(function () {
     rhySeqOnLoad();
 
     $verNum.on(
-        "change, blur", function() {
+        "change, blur",
+        function () {
             let verNumVal = $(this).val();
 
-            if ( verNumVal === "" ) {
-                resetToNeutral( $(this), "Min: 1, Max: 20" );
-            } else if ( 0 < verNumVal && verNumVal < 21 ) {
-                validInvalid( $( this ), "Esto número tiene buena pinta.", valid=true );/* Tiene buena pinta */
+            if (verNumVal === "") {
+                resetToNeutral($(this), "Min: 1, Max: 20");
+            } else if (0 < verNumVal && verNumVal < 21) {
+                validInvalid($(this), "Esto número tiene buena pinta.", valid = true); /* Tiene buena pinta */
             } else {
                 let error_message = "Sólo números. Min: 1, Max: 20"
-                validInvalid( $( this ), error_message, valid=false );
+                validInvalid($(this), error_message, valid = false);
             }
 
-            if ( $rhySeq.val() !== "" ){
+            if ($rhySeq.val() !== "") {
                 validateRhymesSequence();
             }
         }
@@ -350,17 +359,18 @@ $(document).ready(function () {
 
 
     $verLen.on(
-        "change, blur", function() {
+        "change, blur",
+        function () {
             let verLenVal = $(this).val();
 
             if (verLenVal === "") {
-                    resetToNeutral( $(this), "Min: 5, Max: 14" );
-            } else if ( 4 < verLenVal && verLenVal < 15 ) {
+                resetToNeutral($(this), "Min: 5, Max: 14");
+            } else if (4 < verLenVal && verLenVal < 15) {
                 let message = "Me gusta, no parece un número indigesto.";
-                validInvalid( $(this), message, valid=true );
+                validInvalid($(this), message, valid = true);
             } else {
                 let error_message = "Sólo números. Min: 5, Max: 14"
-                validInvalid( $(this), error_message, valid=false );
+                validInvalid($(this), error_message, valid = false);
             }
         }
     );
@@ -369,7 +379,7 @@ $(document).ready(function () {
     $rhySeq.keyup(
         function () {
             showSelect();
-            if ( $(this).val() === "" ) {
+            if ($(this).val() === "") {
                 resetToNeutral($(this), "Ejemplo: ABBA ABBA")
                 hideSelect($selVer);
                 $hidden.hide();
@@ -379,25 +389,27 @@ $(document).ready(function () {
 
 
     $rhySeq.on(
-        "change blur", function() {
+        "change blur",
+        function () {
             validateRhymesSequence();
         }
     );
 
 
     $selVer.change(
-        function() {
-            if ( $(this).val() === 'yes' ) {
-                 if ( $rhySeq.hasClass( "is-valid" ) ) {
-                       if ( $(this).hasClass("is-invalid") ) {;
-                             validInvalid( $(this), "", valid=true);
-                       }
-                       $hidden.show();
+        function () {
+            if ($(this).val() === 'yes') {
+                if ($rhySeq.hasClass("is-valid")) {
+                    if ($(this).hasClass("is-invalid")) {
+                        ;
+                        validInvalid($(this), "", valid = true);
+                    }
+                    $hidden.show();
 
-                 } else {
-                       let error_message = "La secuencia de rimas ha de ser válida.";
-                       validInvalid( $(this), error_message, valid=false );
-                 };
+                } else {
+                    let error_message = "La secuencia de rimas ha de ser válida.";
+                    validInvalid($(this), error_message, valid = false);
+                };
             } else {
                 $hidden.hide();
             };
@@ -406,8 +418,8 @@ $(document).ready(function () {
 
 
     $("form").submit(
-        function(event) {
-            if ( $(".is-invalid").length > 0 ) {
+        function (event) {
+            if ($(".is-invalid").length > 0) {
                 alert("Todavía hay valores incorrectos")
                 event.preventDefault();
             }

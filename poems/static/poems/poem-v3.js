@@ -1,6 +1,6 @@
 $(document).ready(function () {
 
-  const $verses = $( ".verse" );
+  const $verses = $(".verse");
   const verse_stacks = {};
 
   $verses.each(function () {
@@ -25,15 +25,15 @@ $(document).ready(function () {
   //   b.text(verse_chosen_text).attr("id", verse_chosen_id);
   // }
 
-  $( '#reload' ).click( function() {
-      location.reload();
+  $('#reload').click(function () {
+    location.reload();
   });
 
-  $verses.click( function() {
-      $( this ).attr("contenteditable", true);
-      $( this ).blur( function() {
-          $( this ).attr("contenteditable", false);
-      });
+  $verses.click(function () {
+    $(this).attr("contenteditable", true);
+    $(this).blur(function () {
+      $(this).attr("contenteditable", false);
+    });
   });
 
   // $( ".bi-arrow-down-short" ).click( function() {
@@ -50,28 +50,30 @@ $(document).ready(function () {
   //   swap(verse_chosen, verse_prev);
   // });
 
-  $(".oi").click( function () {
-    var $verse_to_change = $(this).parent().prev().children();
-    var old_verse_id = $verse_to_change.attr("id");
-    var old_verse_text = $verse_to_change.text();
-    var old_verse_num = $verse_to_change.attr("class").split(" ")[1];
-    verse_stacks[old_verse_num].push({
-      "id": old_verse_id,
-      "verse_text": old_verse_text,
-    });
+  $(".oi").click(
+    function () {
+      var $verse_to_change = $(this).parent().prev().children();
+      var old_verse_id = $verse_to_change.attr("id");
+      var old_verse_text = $verse_to_change.text();
+      var old_verse_num = $verse_to_change.attr("class").split(" ")[1];
+      verse_stacks[old_verse_num].push({
+        "id": old_verse_id,
+        "verse_text": old_verse_text,
+      });
 
-    $.ajax({
-      url: '/change_verse/',
-      data: `id=${$verse_to_change.attr("id")}`,
-      dataType: "json",
-      success: function(data) {
-        if ( data.not_valid ) {
-          $verse_to_change.css("color", "red");
-        } else {
-          $verse_to_change.attr("id", data.id).text(data.verse_text);
-        };
-      }
-    });
-  });
+      $.ajax({
+        url: '/change_verse/',
+        data: `id=${$verse_to_change.attr("id")}`,
+        dataType: "json",
+        success: function (data) {
+          if (data.not_valid) {
+            $verse_to_change.css("color", "red");
+          } else {
+            $verse_to_change.attr("id", data.id).text(data.verse_text);
+          };
+        }
+      });
+    }
+  );
 
 });
