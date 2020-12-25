@@ -70,7 +70,8 @@ def validate_rhyme(request):
             return JsonResponse(data)
 
         if ver_len_value:
-            verses = cons_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+            verses = cons_obj.verse_set.values_list(
+                "last_word_id").filter(verse_length=ver_len_value)
         else:
             verses = cons_obj.verse_set.values_list("last_word_id")
 
@@ -79,7 +80,8 @@ def validate_rhyme(request):
     # Key is LOWERCASE -> assonant_rhyme checker
     else:
         if rhyme_val.startswith("-"):
-            table = str.maketrans({"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", })
+            table = str.maketrans(
+                {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", })
             rhyme_val = rhyme_val.translate(table).strip("-")
 
         else:
@@ -90,12 +92,15 @@ def validate_rhyme(request):
             asson_obj = AssonantRhyme.objects.get(assonant_rhyme=rhyme_val)
         except AssonantRhyme.DoesNotExist:
             err_msg = "Esta rima no existe en la base de datos por el momento."
-            data = {"not_valid": True,
-                    "error_message": err_msg}
+            data = {
+                "not_valid": True,
+                "error_message": err_msg
+            }
             return JsonResponse(data)
 
         if ver_len_value:
-            verses = asson_obj.verse_set.values_list("last_word_id").filter(verse_length=ver_len_value)
+            verses = asson_obj.verse_set.values_list(
+                "last_word_id").filter(verse_length=ver_len_value)
         else:
             verses = asson_obj.verse_set.values_list("last_word_id")
 
