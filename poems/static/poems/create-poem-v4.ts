@@ -282,6 +282,8 @@ $(document).ready(function () {
             } else {
                 let error_message = "La secuencia de rimas ha de ser válida.";
                 validInvalid($selVer, error_message, false);
+                $hiddenContainer.empty();
+                $hidden.hide();
             };
         } else {
             $hiddenContainer.empty();

@@ -258,6 +258,8 @@ $(document).ready(function () {
             else {
                 var error_message = "La secuencia de rimas ha de ser válida.";
                 validInvalid($selVer, error_message, false);
+                $hiddenContainer.empty();
+                $hidden.hide();
             }
             ;
         }
