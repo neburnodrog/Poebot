@@ -35,9 +35,9 @@
 
     <div class="row justify-content-center">
       <div class="col-auto">
-        <div class="form-group">
-          <label for="id_select_verses" style="display:none;">Quieres elegir las rimas?</label>
-          <select class="form-control text-center" id="id_select_verses" style="display:none;">
+        <div class="form-group" id="hidden_select_group" style="display:none;">
+          <label for="id_select_verses">Quieres elegir las rimas?</label>
+          <select class="form-control text-center" id="id_select_verses">
             <option value="no">No</option>
             <option value="yes">Sí</option>
             <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->
@@ -51,7 +51,7 @@
         <p class="lead text-center pb-2">Especifica las rimas:</p>
       </div>
 
-      <div class="col-12" id="hidden-form">
+      <div class="col-12" id="hidden-container">
       </div>
     </div>
 

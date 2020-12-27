@@ -1,11 +1,12 @@
 $(document).ready(function () {
     // jQuery SELECTOR variables
     var $rhySeq = $("#id_rhy_seq");
-    var $hiddenForm = $("#hidden-form");
+    var $hiddenContainer = $("#hidden-container");
     var $hidden = $("#hidden");
     var $verLen = $("#id_verse_length");
     var $verNum = $("#id_ver_num");
     var $selVer = $('#id_select_verses');
+    var $hiddenSelGroup = $('#hidden_select_group');
     //## VARIABLES ##//
     var asson_words = [
         ["gominola", "-oa"],
@@ -80,8 +81,6 @@ $(document).ready(function () {
         var input = $("<input>", {
             type: "text",
             "class": "form-control rhyme_validator",
-            pattern: "-?[a-zA-ZñÑÓóÁáÉéíÍúÚü]+",
-            title: "Solo números y guión al principio es válido",
             name: rhymeKey,
             id: rhymeKey,
             required: true
@@ -103,7 +102,7 @@ $(document).ready(function () {
                             validInvalid($(this), data.error_message, false);
                         }
                         else {
-                            validInvalid($(this), "Tiene buena pinta", true);
+                            validInvalid($(this), "La rima es válida y existe en la base de datos.", true);
                         }
                     }
                 });
@@ -135,28 +134,18 @@ $(document).ready(function () {
             "class": 'form-text text-muted'
         })
             .text(choose_message(rhymeType));
-        $hiddenForm.append($rhymeDivRow);
+        $hiddenContainer.append($rhymeDivRow);
         $rhymeDivRow.append($rhymeDivCol);
         $rhymeDivCol.append($label, $input, $small);
     }
     function createFormDinamically() {
         var rhySeqVal = String($rhySeq.val());
-        $hiddenForm.empty();
+        $hiddenContainer.empty();
         var sequenceSet = uniqueRhymes(rhySeqVal);
         for (var i = 0; i < sequenceSet.length; i++) {
             createRhymeField(sequenceSet[i]);
         }
-    }
-    /*## SHOW/HIDE SELECT FUNCS ##*/
-    function showSelect() {
-        $selVer.show()
-            .prev()
-            .show();
-    }
-    function hideSelect() {
-        $selVer.hide()
-            .prev()
-            .hide();
+        $hidden.show();
     }
     /*## CHANGE ELEMENTS TO VALID/INVALID/NEUTRAL STATE FUNCS ##*/
     function validInvalid(inputElem, msg, valid) {
@@ -191,45 +180,36 @@ $(document).ready(function () {
     function validateRhymesSequence() {
         var verNumVal = String($verNum.val());
         var rhySeqVal = String($rhySeq.val());
-        if (rhySeqVal === "") {
-        }
-        else if (rhymeSeqIsValid(rhySeqVal, verNumVal)) {
+        if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
+            rhySeqVal.split(" ").join("").length == Number(verNumVal)) {
             validInvalid($rhySeq, "Tiene buena pinta", true);
-            createFormDinamically();
-            showSelect();
-            if ($selVer.val() == "yes") {
-                validInvalid($selVer, "", true);
-                $($hidden).show();
-            }
+            return true;
         }
         else {
             if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
                 var err_msg = "Solo valen caracteres del abecedario y espacios en blanco";
                 validInvalid($rhySeq, err_msg, false);
+                return false;
             }
             else if (rhySeqVal.split(" ").join("").length != Number(verNumVal)) {
                 var err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)";
                 validInvalid($rhySeq, err_msg, false);
+                return false;
             }
-        }
-    }
-    function rhymeSeqIsValid(rhySeqVal, verNumVal) {
-        if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
-            rhySeqVal.split(" ").join("").length == verNumVal) {
-            return true;
-        }
-        else {
-            return false;
         }
     }
     function rhySeqOnLoad() {
         if ($rhySeq.val() === "") {
             resetToNeutral($rhySeq, "Ejemplo: ABBA ABBA");
             $hidden.hide();
-            hideSelect();
+            $hiddenSelGroup.hide();
         }
         else {
-            validateRhymesSequence();
+            $hiddenSelGroup.show();
+            if ($selVer.val() === "yes" && validateRhymesSequence()) {
+                createFormDinamically();
+                $hidden.show();
+            }
         }
     }
     /*## NUMBER OF VERSES INPUT FIELD VALIDATION FUNCS ##*/
@@ -332,12 +312,11 @@ $(document).ready(function () {
         }
     });
     $rhySeq.keyup(function () {
-        showSelect();
+        $hiddenSelGroup.show();
         if ($(this).val() === "") {
             resetToNeutral($(this), "Ejemplo: ABBA ABBA");
-            $selVer.val("no");
-            $hiddenForm.empty;
-            hideSelect();
+            $hiddenContainer.empty;
+            $hiddenSelGroup.hide();
             $hidden.hide();
         }
     });
@@ -350,6 +329,7 @@ $(document).ready(function () {
                 if ($(this).hasClass("is-invalid")) {
                     validInvalid($(this), "", true);
                 }
+                createFormDinamically();
                 $hidden.show();
             }
             else {

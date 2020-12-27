@@ -2,11 +2,12 @@ $(document).ready(function () {
 
     // jQuery SELECTOR variables
     const $rhySeq = $("#id_rhy_seq");
-    const $hiddenForm = $("#hidden-form");
+    const $hiddenContainer = $("#hidden-container");
     const $hidden = $("#hidden");
     const $verLen = $("#id_verse_length");
     const $verNum = $("#id_ver_num");
     const $selVer = $('#id_select_verses');
+    const $hiddenSelGroup = $('#hidden_select_group');
 
     //## VARIABLES ##//
     const asson_words = [
@@ -146,31 +147,19 @@ $(document).ready(function () {
         })
             .text(choose_message(rhymeType));
 
-        $hiddenForm.append($rhymeDivRow);
+        $hiddenContainer.append($rhymeDivRow);
         $rhymeDivRow.append($rhymeDivCol);
         $rhymeDivCol.append($label, $input, $small);
     }
     function createFormDinamically(): void {
         let rhySeqVal = String($rhySeq.val())
-        $hiddenForm.empty();
+        $hiddenContainer.empty();
 
         let sequenceSet = uniqueRhymes(rhySeqVal);
         for (var i = 0; i < sequenceSet.length; i++) {
             createRhymeField(sequenceSet[i]);
         }
-    }
-
-
-    /*## SHOW/HIDE SELECT FUNCS ##*/
-    function showSelect(): void {
-        $selVer.show()
-            .prev()
-            .show();
-    }
-    function hideSelect(): void {
-        $selVer.hide()
-            .prev()
-            .hide();
+        $hidden.show();
     }
 
 
@@ -208,53 +197,42 @@ $(document).ready(function () {
 
 
     /*## RHYMES SEQUENCE INPUT VALIDATION FUNCS ##*/
-    function validateRhymesSequence() {
+    function validateRhymesSequence(): boolean {
         let verNumVal = String($verNum.val());
         let rhySeqVal = String($rhySeq.val());
 
-        if (rhySeqVal === "") {
-
-        } else if (rhymeSeqIsValid(rhySeqVal, verNumVal)) {
-
+        if (
+            /^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
+            rhySeqVal.split(" ").join("").length == Number(verNumVal)
+        ) {
             validInvalid($rhySeq, "Tiene buena pinta", true);
-            createFormDinamically();
-
-            showSelect();
-
-            if ($selVer.val() == "yes") {
-                validInvalid($selVer, "", true);
-                $($hidden).show();
-            }
+            return true;
 
         } else {
-
             if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
                 let err_msg = "Solo valen caracteres del abecedario y espacios en blanco";
                 validInvalid($rhySeq, err_msg, false);
+                return false;
 
             } else if (rhySeqVal.split(" ").join("").length != Number(verNumVal)) {
                 let err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)"
                 validInvalid($rhySeq, err_msg, false);
+                return false;
             }
         }
     }
-    function rhymeSeqIsValid(rhySeqVal, verNumVal) {
-        if (
-            /^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
-            rhySeqVal.split(" ").join("").length == verNumVal
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    function rhySeqOnLoad() {
+    function rhySeqOnLoad(): void {
         if ($rhySeq.val() === "") {
             resetToNeutral($rhySeq, "Ejemplo: ABBA ABBA");
             $hidden.hide();
-            hideSelect();
+            $hiddenSelGroup.hide();
         } else {
-            validateRhymesSequence();
+            $hiddenSelGroup.show();
+
+            if ($selVer.val() === "yes" && validateRhymesSequence()) {
+                createFormDinamically();
+                $hidden.show();
+            }
         }
     }
 
@@ -368,12 +346,11 @@ $(document).ready(function () {
     );
     $rhySeq.keyup(
         function () {
-            showSelect();
+            $hiddenSelGroup.show();
             if ($(this).val() === "") {
                 resetToNeutral($(this), "Ejemplo: ABBA ABBA")
-                $selVer.val("no");
-                $hiddenForm.empty;
-                hideSelect();
+                $hiddenContainer.empty;
+                $hiddenSelGroup.hide();
                 $hidden.hide();
             }
         }
@@ -391,6 +368,7 @@ $(document).ready(function () {
                     if ($(this).hasClass("is-invalid")) {
                         validInvalid($(this), "", true);
                     }
+                    createFormDinamically();
                     $hidden.show();
 
                 } else {
