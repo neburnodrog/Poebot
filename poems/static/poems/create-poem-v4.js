@@ -177,7 +177,7 @@ $(document).ready(function () {
             .text(msg);
     }
     /*## RHYMES SEQUENCE INPUT VALIDATION FUNCS ##*/
-    function validateRhymesSequence() {
+    function rhySeqIsValid() {
         var verNumVal = String($verNum.val());
         var rhySeqVal = String($rhySeq.val());
         if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
@@ -206,7 +206,7 @@ $(document).ready(function () {
         }
         else {
             $hiddenSelGroup.show();
-            if ($selVer.val() === "yes" && validateRhymesSequence()) {
+            if ($selVer.val() === "yes" && rhySeqIsValid()) {
                 createFormDinamically();
                 $hidden.show();
             }
@@ -215,43 +215,32 @@ $(document).ready(function () {
     /*## NUMBER OF VERSES INPUT FIELD VALIDATION FUNCS ##*/
     function verNumIsValid() {
         var verNumVal = $verNum.val();
-        if (0 < verNumVal && verNumVal < 21) {
+        if ($verNum.val() == "") {
+            resetToNeutral($verNum, "Min: 1, Max: 20");
+            return true;
+        }
+        else if (0 < verNumVal && verNumVal < 21) {
+            validInvalid($verNum, "Tiene buena pinta.", true);
             return true;
         }
         else {
-            return false;
-        }
-    }
-    function verNumOnLoad() {
-        if ($verNum.val() == "") {
-            resetToNeutral($verNum, "Min: 1, Max: 20");
-        }
-        else if (verNumIsValid()) {
-            validInvalid($verNum, "Tiene buena pinta.", true);
-        }
-        else {
             validInvalid($verNum, "Solo números. Min: 1, Max: 20", false);
+            return false;
         }
     }
     /*## LENGTH OF VERSES INPUT FIELD VALIDATION FUNCS ##*/
     function verLenIsValid() {
         var verLenVal = $verLen.val();
-        if (4 < verLenVal && verLenVal < 15) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    function verLenOnLoad() {
         if ($verLen.val() == "") {
             resetToNeutral($verLen, "Min: 5, Max: 14");
         }
-        else if (verLenIsValid()) {
+        else if (4 < verLenVal && verLenVal < 15) {
             validInvalid($verLen, "Tiene buena pinta.", true);
+            return true;
         }
         else {
             validInvalid($verLen, "Solo números. Min: 5, Max: 14", false);
+            return false;
         }
     }
     /*## POPOVER ACTIVATION ##*/
@@ -277,8 +266,8 @@ $(document).ready(function () {
         trigger: "focus"
     });
     /* ON READY VERIFICATION OF FIELDS */
-    verNumOnLoad();
-    verLenOnLoad();
+    verNumIsValid();
+    verLenIsValid();
     rhySeqOnLoad();
     /*## EVENT LISTENERS ##*/
     $verNum.on("change, blur", function () {
@@ -294,7 +283,7 @@ $(document).ready(function () {
             validInvalid($(this), error_message, false);
         }
         if ($rhySeq.val() !== "") {
-            validateRhymesSequence();
+            rhySeqIsValid();
         }
     });
     $verLen.on("change, blur", function () {
@@ -321,7 +310,7 @@ $(document).ready(function () {
         }
     });
     $rhySeq.on("change blur", function () {
-        validateRhymesSequence();
+        rhySeqIsValid();
     });
     $selVer.change(function () {
         if ($(this).val() === 'yes') {
