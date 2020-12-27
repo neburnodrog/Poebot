@@ -182,6 +182,7 @@ $(document).ready(function () {
         var rhySeqVal = String($rhySeq.val());
         if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == true &&
             rhySeqVal.split(" ").join("").length == Number(verNumVal)) {
+            selVerIsValid();
             validInvalid($rhySeq, "Tiene buena pinta", true);
             return true;
         }
@@ -189,11 +190,13 @@ $(document).ready(function () {
             if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
                 var err_msg = "Solo valen caracteres del abecedario y espacios en blanco";
                 validInvalid($rhySeq, err_msg, false);
+                selVerIsValid();
                 return false;
             }
             else if (rhySeqVal.split(" ").join("").length != Number(verNumVal)) {
                 var err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)";
                 validInvalid($rhySeq, err_msg, false);
+                selVerIsValid();
                 return false;
             }
         }
@@ -243,6 +246,27 @@ $(document).ready(function () {
             return false;
         }
     }
+    function selVerIsValid() {
+        if (String($selVer.val()) === 'yes') {
+            if ($rhySeq.hasClass("is-valid")) {
+                if ($selVer.hasClass("is-invalid")) {
+                    validInvalid($selVer, "", true);
+                }
+                createFormDinamically();
+                $hidden.show();
+            }
+            else {
+                var error_message = "La secuencia de rimas ha de ser válida.";
+                validInvalid($selVer, error_message, false);
+            }
+            ;
+        }
+        else {
+            $hiddenContainer.empty();
+            $hidden.hide();
+        }
+        ;
+    }
     /*## POPOVER ACTIVATION ##*/
     $(".popover").each(function () {
         var text = $(this).parent().prev()
@@ -269,6 +293,7 @@ $(document).ready(function () {
     verNumIsValid();
     verLenIsValid();
     rhySeqOnLoad();
+    selVerIsValid();
     /*## EVENT LISTENERS ##*/
     $verNum.on("change, blur", function () {
         var verNumVal = $(this).val();
@@ -313,24 +338,7 @@ $(document).ready(function () {
         rhySeqIsValid();
     });
     $selVer.change(function () {
-        if ($(this).val() === 'yes') {
-            if ($rhySeq.hasClass("is-valid")) {
-                if ($(this).hasClass("is-invalid")) {
-                    validInvalid($(this), "", true);
-                }
-                createFormDinamically();
-                $hidden.show();
-            }
-            else {
-                var error_message = "La secuencia de rimas ha de ser válida.";
-                validInvalid($(this), error_message, false);
-            }
-            ;
-        }
-        else {
-            $hidden.hide();
-        }
-        ;
+        selVerIsValid();
     });
     $("form").submit(function (event) {
         if ($(".is-invalid").length > 0) {
