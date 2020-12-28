@@ -22,7 +22,7 @@ class CreatePoemView(FormView):
 
     def get(self, *args, **kwargs):
         super().get(*args, **kwargs)
-        if 'submit' in self.request.GET:
+        if self.request.GET:
             form = CreatePoemForm(self.request.GET)
             if form.is_valid():
                 query_string = urlencode(form.data, ascii)
@@ -105,10 +105,11 @@ def validate_rhyme(request):
             verses = asson_obj.verse_set.values_list("last_word_id")
 
         words_count = set(verses)
-
+        word_limit = 3 * rhy_seq_value.count(rhyme_code)
+        verse_limit = 3 * word_limit
     if (
-            len(verses) < 2 * rhy_seq_value.count(rhyme_code)
-            or len(words_count) < 2 * rhy_seq_value.count(rhyme_code)
+            len(words_count) < word_limit
+            or len(verses) < verse_limit
     ):
         error_message = "No hay rimas suficientes de este tipo\
         en la base de datos para continuar."
@@ -152,20 +153,20 @@ class PoemView(ListView):
 
 def change_verse(request):
     verse_id = request.GET.get('id')
+    # verse_last_word = Verse.objects.filter(id=verse_id).values_list("last_word__word_text")[0][0]
     values_dict = Verse.objects.filter(id=verse_id).values(
         "verse_length",
         "consonant_rhyme",
         "is_beg",
         "is_int",
-        "is_end", )[0]
+        "is_end", 
+        )[0]
 
     if possible_verses := Verse.objects.values_list("id").filter(
-        **values_dict
-    ).exclude(id=verse_id):
-        # TODO -> send the full list and let JS handle the stack.
-        new_id = random.choice(possible_verses)[0]
-        data = Verse.objects.values("id", "verse_text").get(id=new_id)
+        **values_dict).exclude(id=verse_id):
+            new_id = random.choice(possible_verses)[0]
+            data = Verse.objects.values("id", "verse_text").get(id=new_id)
     else:
         data = {"not_valid": True}
-
+        
     return JsonResponse(data)

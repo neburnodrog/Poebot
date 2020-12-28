@@ -1,6 +1,6 @@
 import random
 from re import finditer
-from typing import Union, Optional, List, Dict
+from typing import Union, Optional, List, Dict, Set
 
 from poems.analyse_verses import Syllabifier
 from poems.models import Verse, AssonantRhyme, ConsonantRhyme, Word
@@ -8,19 +8,26 @@ from poems.models import Verse, AssonantRhyme, ConsonantRhyme, Word
 from django.db.models import QuerySet
 
 
+WordSetType = Dict[str, Dict[str, QuerySet[Verse]]]
+RhymeSetType = Dict[str, Optional[Union[ConsonantRhyme, AssonantRhyme]]]
+
+
 class PoemAutomator:
     def __init__(self, **kwargs):
         #  FROM KWARGS -> Possible keys: "ver_num", "verse_length", "rhy_seq", "rhymes_to_use"
         self.number_verses = kwargs.get("ver_num")  # type: Union[int, str]
-        self.length_of_verses = kwargs.get(
+        self.verse_length = kwargs.get(
             "verse_length")  # type: Union[List, range, int]
-        self.verse_length_type = type(self.length_of_verses)
-        self.rhyme_sequence = RhymeSequence(kwargs.get("rhy_seq"), kwargs.get("rhymes_to_use"),
-                                            self.number_verses)  # type: RhymeSequence
+        self.verse_length_type = type(self.verse_length)
+        self.rhyme_sequence = RhymeSequence(
+            self,
+            kwargs.get("rhy_seq"),
+            kwargs.get("rhymes_to_use"),
+        )
 
         #  Not from KWARGS
-        self.wordset_available = WordSet(
-            self.rhyme_sequence, self.length_of_verses, self.verse_length_type)
+        self.wordset_available = WordSet(self)
+
         self.poem = []
 
     @property
@@ -33,22 +40,22 @@ class PoemAutomator:
             4, 16) if not value else int(value)
 
     @property
-    def length_of_verses(self) -> Union[List, range]:
-        return self._length_of_verses
+    def verse_length(self) -> Union[List, range]:
+        return self._verse_length
 
-    @length_of_verses.setter
-    def length_of_verses(self, value: str) -> None:
+    @verse_length.setter
+    def verse_length(self, value: str) -> None:
         if not value:
             a, b = random.randint(5, 14), random.randint(5, 14)
-            self._length_of_verses = range(a, b) if a < b else range(b, a)
+            self._verse_length = range(a, b) if a < b else range(b, a)
 
         elif "_" in value:
             a, b = value.split("_")
-            self._length_of_verses = range(int(a), int(b))
+            self._verse_length = range(int(a), int(b))
 
         else:
             len_ver = [int(num) for num in value.split(",")]
-            self._length_of_verses = len_ver[0] if len(
+            self._verse_length = len_ver[0] if len(
                 len_ver) == 1 else len_ver
 
     def poem_generator(self):
@@ -58,7 +65,7 @@ class PoemAutomator:
             #  For each rhyme code in the sequence append a verse to self.poem
             if self.wordset_available.word_set:
 
-                word = self.wordset_available.choose_word(rhyme_code)
+                word = self.wordset_available.get_word(rhyme_code)
                 verse = self.select_verse(word, self.poem)
                 while not verse:
                     verse = self.alternative_method_for_getting_id(
@@ -82,8 +89,8 @@ class PoemAutomator:
     def select_verse(self, word: Word, poem: List[Union[Verse, str]]) -> Union[Verse, None]:
         verse_type = self.type_determiner(poem)
 
-        if self.verse_length_type == range:  # Option C
-            start, stop = self.length_of_verses.start, self.length_of_verses.stop
+        if self.verse_length_type == range:
+            start, stop = self.verse_length.start, self.verse_length.stop
             verses = word.verse_set.values_list("id").filter(
                 **verse_type,
                 verse_length__gte=start,
@@ -97,7 +104,7 @@ class PoemAutomator:
         else:
             verses = word.verse_set.values_list("id").filter(
                 **verse_type,
-                verse_length=self.length_of_verses
+                verse_length=self.verse_length
             )
 
         if not verses:
@@ -126,10 +133,10 @@ class PoemAutomator:
         """Find a different word that rhymes and then substitute"""
         wordset = self.wordset_available.word_set[rhyme_code]
 
-        if wordset.count() > 10:
+        if len(wordset.keys()) > 10:
             i = 0
-            while i < wordset.count():
-                new_word = self.wordset_available.choose_word(rhyme_code)
+            while i < len(wordset.keys()):
+                new_word = self.wordset_available.get_word(rhyme_code)
                 if new_word == word:
                     continue
                 verse = self.select_verse(new_word, poem)
@@ -188,15 +195,17 @@ class PoemAutomator:
 
 
 class RhymeSequence:
-    def __init__(self, rhyme_sequence, user_rhymes, number_verses):
-        self.rhyme_sequence = rhyme_sequence if rhyme_sequence else "_" * number_verses
+    def __init__(self, poemauto, rhyme_sequence, user_rhymes):
+        self.poemauto = poemauto  # parent
+        self.verse_length = self.poemauto.verse_length
+        self.rhyme_sequence = rhyme_sequence if rhyme_sequence else "_" * self.poemauto.number_verses
         self.empty_lines = self.empty_lines_finder()
         self.clean_rhyme_sequence = list(self.rhyme_sequence.replace(" ", ""))
         self.user_rhymes = user_rhymes
-        self.unique_rhymes_keys = set(self.clean_rhyme_sequence)
+        self.unique_rhymes_keys: Set = set(self.clean_rhyme_sequence)
         self.rhyme_set = self.get_rhyme_set()
 
-    def get_rhyme_set(self):
+    def get_rhyme_set(self) -> RhymeSetType:
         if not self.user_rhymes:  # rhymes_to_use not defined by user
             if "_" in self.rhyme_sequence:  # AND rhy_seq not defined by user -> no rhymes at all
                 return {"_": None}
@@ -206,44 +215,57 @@ class RhymeSequence:
         else:  # just fetch the RhymesObjects defined by the user and populate self.rhyme_set with them
             return self.user_determined_rhymes()
 
-    def randomly_determine_rhymes(self) -> Dict[str, Union[ConsonantRhyme, AssonantRhyme, None]]:
+    def randomly_determine_rhymes(self) -> RhymeSetType:
         rhyme_set = {}
         unique_rhymes = self.unique_rhymes_keys
 
         for key in unique_rhymes:
             # TODO lower this value to use stranger rhymes
-            word_limit = self.clean_rhyme_sequence.count(key) * 2
+            word_limit = self.clean_rhyme_sequence.count(key) * 3
             verse_limit = word_limit * 3
 
             if key == key.upper():  # if capital letter -> consonant rhyme
                 cons_ids = ConsonantRhyme.objects.values_list("id").filter(
                     amount_verses__gte=verse_limit,
-                    amount_words__gte=word_limit,
-                )
+                    amount_words__gte=word_limit,)
 
-                cons_rhy_id = random.choice(cons_ids)[0]
-                rhyme_object = ConsonantRhyme.objects.get(id=cons_rhy_id)
-                while rhyme_object in rhyme_set.values():
-                    cons_rhy_id = random.choice(cons_ids)[0]
-                    rhyme_object = ConsonantRhyme.objects.get(id=cons_rhy_id)
+                rhyme_object = self.choose_rhyme_id(
+                    rhyme_set, cons_ids, word_limit, verse_limit, ConsonantRhyme)
 
             else:  # Assonant
                 asson_ids = AssonantRhyme.objects.values_list("id").filter(
                     amount_verses__gte=verse_limit,
-                    amount_words__gte=word_limit
-                )
+                    amount_words__gte=word_limit)
 
-                asson_rhy_id = random.choice(asson_ids)[0]
-                rhyme_object = AssonantRhyme.objects.get(id=asson_rhy_id)
-                while rhyme_object in rhyme_set.values():
-                    asson_rhy_id = random.choice(asson_ids)[0]
-                    rhyme_object = AssonantRhyme.objects.get(id=asson_rhy_id)
+                rhyme_object = self.choose_rhyme_id(
+                    rhyme_set, asson_ids, word_limit, verse_limit, AssonantRhyme)
 
             rhyme_set[key] = rhyme_object
 
         return rhyme_set
 
-    def user_determined_rhymes(self) -> Dict[str, Union[ConsonantRhyme, AssonantRhyme, None]]:
+    def choose_rhyme_id(self, rhyme_set, rhyme_ids, word_limit, verse_limit, rhyme_type):
+        rhy_id = random.choice(rhyme_ids)[0]
+        rhyme_object = rhyme_type.objects.get(id=rhy_id)
+        num_word_in_rhy = rhyme_object.verse_set.values_list("last_word").filter(
+            verse_length=self.verse_length).distinct().count()
+        num_ver_in_rhy = rhyme_object.verse_set.values_list("id").filter(
+            verse_length=self.verse_length).count()
+
+        while (rhyme_object in rhyme_set.values()
+               or num_ver_in_rhy < verse_limit
+               or num_word_in_rhy < word_limit
+        ):
+            rhy_id = random.choice(rhyme_ids)[0]
+            rhyme_object = rhyme_type.objects.get(id=rhy_id)
+            num_word_in_rhy = rhyme_object.verse_set.values_list("last_word").filter(
+                verse_length=self.verse_length).distinct().count()
+            num_ver_in_rhy = rhyme_object.verse_set.values_list("id").filter(
+                verse_length=self.verse_length).count()
+
+        return rhyme_object
+
+    def user_determined_rhymes(self) -> RhymeSetType:
         rhyme_set = {}
         rhyme_sequence = self.unique_rhymes_keys
 
@@ -290,28 +312,31 @@ class RhymeSequence:
 
 
 class WordSet:
-    def __init__(self, rhyme_sequence, verse_length, verse_length_type):
-        self.rhyme_sequence = rhyme_sequence
-        # type: Dict[str, QuerySet[Word]]
+    def __init__(self, poemauto):
+        self.poemauto = poemauto
+        self.rhyme_sequence: RhymeSequence = self.poemauto.rhyme_sequence
         self.word_set = self.which_word_set()
         if not self.word_set:
-            self.verse_set = self.random_verses(
-                verse_length, verse_length_type)
-        self.used_words = []  # type: List
+            self.verse_set = self.random_verses()
 
-    def which_word_set(self) -> Union[None, Dict[str, QuerySet[Word]]]:
+        self.used_words = []
+
+    def which_word_set(self) -> Optional[WordSetType]:
         """Control flow:
         1. either user specified rhyme_sequence or we create totally random verses without rhyme
         2. either user determined or random rhymes"""
-        if "_" in self.rhyme_sequence.rhyme_sequence:
+
+        if "_" in self.rhyme_sequence.unique_rhymes_keys:
             return None
 
         word_set = self.determine_word_set()
         return word_set
 
-    @staticmethod
-    def random_verses(verse_length: Union[List, int, range], verse_length_type: type) -> QuerySet[Verse]:
+    def random_verses(self) -> QuerySet[Verse]:
         """User either determined: integer A=value, B=a couple of values or C=a range"""
+        verse_length_type = self.poemauto.verse_length_type
+        verse_length = self.poemauto.verse_length
+
         if verse_length_type == range:
             verses_to_use = Verse.objects.filter(
                 verse_length__gte=verse_length.start,
@@ -328,22 +353,38 @@ class WordSet:
 
         return verses_to_use
 
-    def determine_word_set(self) -> Dict[str, QuerySet[Word]]:
+    def determine_word_set(self) -> WordSetType:
         """Populates the self.words_available dict with a QuerySet of models.Words objects that matches the requirements"""
         word_set = {}
-        rhyme_sequence = self.rhyme_sequence.unique_rhymes_keys
+        rhyme_keys = self.rhyme_sequence.unique_rhymes_keys
 
-        for key in rhyme_sequence:
+        for key in rhyme_keys:
             rhyme_object = self.rhyme_sequence.rhyme_set[key]
-            words_in_rhyme_object = rhyme_object.word_set.filter(
-                amount_verses__gt=1)
-            word_set[key] = words_in_rhyme_object
+            if self.poemauto.verse_length_type == range:
+                verses_in_rhy_obj = rhyme_object.verse_set.filter(
+                    verse_length__gte=self.poemauto.verse_length.start,
+                    verse_length__lte=self.poemauto.verse_length.stop,
+                )
+
+            #elif self.poemauto.verse_length_type == list:
+            else:
+                verses_in_rhy_obj = rhyme_object.verse_set.filter(
+                    verse_length=self.poemauto.verse_length
+                )
+
+            words_in_rhy_obj = verses_in_rhy_obj.values_list("last_word__word_text").distinct()
+
+            verse_set: Dict[str, QuerySet] = {}
+            for word in words_in_rhy_obj:
+                word = word[0]
+                verse_set[word] = verses_in_rhy_obj.filter(last_word__word_text=word)
+
+            word_set[key] = verse_set
 
         return word_set
 
-    def choose_word(self, rhyme_key) -> Word:
-        word_id = self.get_random_word_id(rhyme_key)
-        word = self.word_set[rhyme_key].get(id=word_id)
+    def get_word(self, rhyme_key) -> Word:
+        word = random.choice(self.word_set[rhyme_key].keys())
         return word
 
     def choose_verse_from_verseset(self, verse_type):
@@ -357,9 +398,6 @@ class WordSet:
         self.verse_set.exclude(last_word=verse.last_word)
         self.used_words.append(verse.last_word)
         return verse
-
-    def get_random_word_id(self, rhyme_key: str) -> int:
-        return random.choice(self.word_set[rhyme_key].values_list("id"))[0]
 
     def exclude_word(self, word, rhyme_key):
         self.word_set[rhyme_key] = self.word_set[rhyme_key].exclude(id=word.id)

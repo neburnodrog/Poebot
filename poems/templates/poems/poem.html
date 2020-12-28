@@ -14,7 +14,8 @@
   <div class="row">
     <div class="col-1 d-none d-sm-block my-auto"></div>
     <div class="col-10 align-self-center text-left">
-      <p id="{{verse.id}}" name="verse_id" class="verse ver_num_{{forloop.counter}}">{{ verse.verse_text }}</p>
+      <p id="{{verse.id}}" name="verse_id" class="verse ver_num_{{forloop.counter}}" contenteditable="true">
+        {{ verse.verse_text }}</p>
     </div>
     <div class="col-1 d-sm-block my-auto">
       <span class="oi oi-loop-circular" title="icon loop-circular"></span>

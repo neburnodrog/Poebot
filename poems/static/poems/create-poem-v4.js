@@ -348,7 +348,16 @@ $(document).ready(function () {
             event.preventDefault();
         }
         else {
-            $(this).trigger("submit");
+            /*<button class="btn btn-primary" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...
+            </button>*/
+            var $submit = $("#submit").attr("disabled", "true").text(" Generar Poema");
+            var $loadingGif = $("<span>", {
+                "class": "spinner-border spinner-border-sm"
+            });
+            $submit.prepend($loadingGif);
+            $(this).off().submit();
         }
     });
 });

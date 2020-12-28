@@ -386,7 +386,20 @@ $(document).ready(function () {
                 alert("Todavía hay valores incorrectos")
                 event.preventDefault();
             } else {
-                $(this).trigger("submit");
+                /*<button class="btn btn-primary" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Loading...
+                </button>*/
+                let $submit = $("#submit").attr("disabled", "true").text(" Generar Poema");
+                let $loadingGif = $(
+                    "<span>", {
+                    class: "spinner-border spinner-border-sm",
+                }
+                );
+
+                $submit.prepend($loadingGif);
+
+                $(this).off().submit();
             }
         }
     );
