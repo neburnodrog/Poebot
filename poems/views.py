@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 import random
 
 from django.views.generic import ListView, FormView
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 
@@ -12,7 +12,7 @@ from .poemator import PoemAutomator
 from .analyse_verses import Syllabifier
 
 
-def home_view(request):
+def home_view(request: HttpRequest) -> HttpResponse:
     return render(request, "poems/home.html")
 
 
@@ -20,7 +20,7 @@ class CreatePoemView(FormView):
     template_name = "poems/create-poem.html"
     form_class = CreatePoemForm
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> HttpResponse:
         super().get(*args, **kwargs)
         if self.request.GET:
             form = CreatePoemForm(self.request.GET)
@@ -38,17 +38,17 @@ class CreatePoemView(FormView):
         )
 
 
-def validate_rhyme(request):
+def validate_rhyme(request: HttpRequest) -> JsonResponse:
     data = request.GET
 
     for key in data:
         if key == "verse_length":
-            ver_len_value = request.GET.get(key)
+            ver_len_value: str = request.GET.get(key)
         elif key == "rhy_seq":
-            rhy_seq_value = request.GET.get(key)
+            rhy_seq_value: str = request.GET.get(key)
         else:
-            rhyme_code = key
-            rhyme_val = request.GET.get(rhyme_code).lower()
+            rhyme_code: str = key
+            rhyme_val: str = request.GET.get(rhyme_code).lower()
 
     # Key is UPPERCASE -> consonant_rhyme checker
     if rhyme_code == rhyme_code.upper():
@@ -64,10 +64,10 @@ def validate_rhyme(request):
             cons_obj = ConsonantRhyme.objects.get(consonant_rhyme=rhyme_val)
         except ConsonantRhyme.DoesNotExist:
             err_msg = "Esta rima no existe en la base de datos por el momento."
-            data = {"not_valid": True,
-                    "error_message": err_msg}
+            data_resp = {"not_valid": True,
+                         "error_message": err_msg}
 
-            return JsonResponse(data)
+            return JsonResponse(data_resp)
 
         if ver_len_value:
             verses = cons_obj.verse_set.values_list(
@@ -92,11 +92,11 @@ def validate_rhyme(request):
             asson_obj = AssonantRhyme.objects.get(assonant_rhyme=rhyme_val)
         except AssonantRhyme.DoesNotExist:
             err_msg = "Esta rima no existe en la base de datos por el momento."
-            data = {
+            data_resp = {
                 "not_valid": True,
                 "error_message": err_msg
             }
-            return JsonResponse(data)
+            return JsonResponse(data_resp)
 
         if ver_len_value:
             verses = asson_obj.verse_set.values_list(
@@ -113,10 +113,10 @@ def validate_rhyme(request):
     ):
         error_message = "No hay rimas suficientes de este tipo\
         en la base de datos para continuar."
-        data = {"not_valid": True,
-                "error_message": error_message}
+        data_resp = {"not_valid": True,
+                     "error_message": error_message}
 
-    return JsonResponse(data)
+    return JsonResponse(data_resp)
 
 
 class PoemView(ListView):
@@ -151,7 +151,7 @@ class PoemView(ListView):
         return context
 
 
-def change_verse(request):
+def change_verse(request: HttpRequest) -> JsonResponse:
     verse_id = request.GET.get('id')
     # verse_last_word = Verse.objects.filter(id=verse_id).values_list("last_word__word_text")[0][0]
     values_dict = Verse.objects.filter(id=verse_id).values(
@@ -159,14 +159,14 @@ def change_verse(request):
         "consonant_rhyme",
         "is_beg",
         "is_int",
-        "is_end", 
-        )[0]
+        "is_end",
+    )[0]
 
     if possible_verses := Verse.objects.values_list("id").filter(
-        **values_dict).exclude(id=verse_id):
-            new_id = random.choice(possible_verses)[0]
-            data = Verse.objects.values("id", "verse_text").get(id=new_id)
+            **values_dict).exclude(id=verse_id):
+        new_id = random.choice(possible_verses)[0]
+        data = Verse.objects.values("id", "verse_text").get(id=new_id)
     else:
         data = {"not_valid": True}
-        
+
     return JsonResponse(data)

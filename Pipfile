@@ -7,6 +7,7 @@ verify_ssl = true
 pytest = "*"
 pytest-django = "*"
 mypy = "*"
+django-stubs = "*"
 
 [packages]
 django = "*"
