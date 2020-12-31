@@ -1,6 +1,11 @@
 $(document).ready(function () {
 
     $('#reload').click(function () {
+        var $submit = $("#reload").attr("disabled", "true").text(" Refrescar");
+        var $loadingGif = $("<span>", {
+            "class": "spinner-border spinner-border-sm"
+        });
+        $submit.prepend($loadingGif);
         location.reload();
     });
 
