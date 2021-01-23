@@ -8,5 +8,4 @@ $(document).ready(function () {
         $(this).addClass("alert-sm alert-danger");
     })
 
-
 })

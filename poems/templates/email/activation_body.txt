@@ -1,0 +1,7 @@
+Hola {{ username }}!
+
+Para terminar el proceso de registro picha en el siguiente link:
+
+{{ protocol }}://{{ domain }}{% url 'poems:activate' uid token %}
+
+¡Bienvenido a los aposentos online del Poebot!
