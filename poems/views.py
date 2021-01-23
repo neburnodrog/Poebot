@@ -1,19 +1,24 @@
+# IMPORTS
 from urllib.parse import urlencode
+from django.contrib.auth.forms import User
+from pyverse import Pyverse
 import random
 
-from django.views.generic import ListView, FormView
+from django.views.generic import ListView, FormView, TemplateView, DetailView
 from django.http import JsonResponse, HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.contrib.auth.models import User
+from django.forms.forms import BaseForm
 
-from .forms import CreatePoemForm
+from .forms import CreatePoemForm, RegisterForm
 from .models import Verse, AssonantRhyme, ConsonantRhyme
 from .poemator import PoemAutomator
-from .analyse_verses import Syllabifier
 
 
-def home_view(request: HttpRequest) -> HttpResponse:
-    return render(request, "poems/home.html")
+# Views
+class HomeView(TemplateView):
+    template_name = "poems/home.html"
 
 
 class CreatePoemView(FormView):
@@ -58,7 +63,7 @@ def validate_rhyme(request: HttpRequest) -> JsonResponse:
 
         else:
             # This to be able to input either a word & an ending
-            rhyme_val = Syllabifier(rhyme_val).consonant_rhyme
+            rhyme_val = Pyverse(rhyme_val).consonant_rhyme
 
         try:
             cons_obj = ConsonantRhyme.objects.get(consonant_rhyme=rhyme_val)
@@ -86,7 +91,7 @@ def validate_rhyme(request: HttpRequest) -> JsonResponse:
 
         else:
             # This to be able to input either a word & an ending
-            rhyme_val = Syllabifier(rhyme_val).assonant_rhyme
+            rhyme_val = Pyverse(rhyme_val).assonant_rhyme
 
         try:
             asson_obj = AssonantRhyme.objects.get(assonant_rhyme=rhyme_val)
@@ -115,6 +120,9 @@ def validate_rhyme(request: HttpRequest) -> JsonResponse:
         en la base de datos para continuar."
         data_resp = {"not_valid": True,
                      "error_message": error_message}
+
+    else:
+        data_resp = {"not_valid": False}
 
     return JsonResponse(data_resp)
 
@@ -170,3 +178,27 @@ def change_verse(request: HttpRequest) -> JsonResponse:
         data = {"not_valid": True}
 
     return JsonResponse(data)
+
+
+class RegisterView(FormView):
+    template_name = "registration/register.html"
+    form_class = RegisterForm
+    success_url = "login"
+
+    def form_valid(self, form: BaseForm) -> HttpResponse:
+        user = User(
+            username=form.cleaned_data["username"],
+            email=form.cleaned_data["email"],
+            password=form.cleaned_data["password1"],
+        )
+        
+        user.is_active = False
+        
+        user.save()
+        
+        return super().form_valid(form)
+
+
+class ProfileView(DetailView):
+    model = User()
+    template_name = "registration/profile.html"

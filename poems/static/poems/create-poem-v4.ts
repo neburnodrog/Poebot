@@ -101,17 +101,18 @@ $(document).ready(function () {
 
         input.change(
             function () {
-                let inputVal = String($(this).val());
+                let $input = $(this)
+                let inputVal = String($input.val());
                 if (/^-?[a-zA-ZñÑÓóÁáÉéíÍúÚü]+$/.test(inputVal)) {
                     $.ajax({
                         url: "/validate/",
                         data: $(this).serialize() + "&" + $rhySeq.serialize() + "&" + $verLen.serialize(),
                         dataType: 'json',
-                        success: function (data) {
-                            if (data.not_valid) {
-                                validInvalid($(this), data.error_message, false)
+                        success: function (resp_data) {
+                            if (resp_data.not_valid) {
+                                validInvalid($input, resp_data.error_message, false)
                             } else {
-                                validInvalid($(this), "La rima es válida y existe en la base de datos.", true)
+                                validInvalid($input, "La rima es válida y existe en la base de datos.", true)
                             }
                         }
                     });

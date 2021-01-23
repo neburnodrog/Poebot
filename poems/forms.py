@@ -1,4 +1,14 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
 
 class CreatePoemForm(forms.Form):
@@ -28,4 +38,76 @@ class CreatePoemForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'form-control text-center'
+            visible.field.widget.attrs["class"] = "form-control text-center"
+
+
+class RegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "password1",
+            "password2",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        fields = self.visible_fields()
+
+        username = fields[0]
+        username.label = "Nombre de usuario"
+        username.help_text = (
+            "150 caracteres máximo. Sólo letras , dígitos y @ . - + o _"
+        )
+        username.field.widget.attrs["class"] = "form-control text-center"
+
+        email = fields[1]
+        email.field.widget.attrs["required"] = "true"
+        email.label = "Dirección de correo electrónico"
+        email.help_text = "introduce aquí tu e-mail."
+        email.field.widget.attrs["class"] = "form-control text-center"
+
+        password = fields[2]
+        password.label = "Contraseña"
+        password.help_text = "La contraseña no puede ser similar a tu otra información,\
+        ha de contener al menos 8 caracteres y no podrá exclusivamente numérica."
+        password.field.widget.attrs["class"] = "form-control text-center"
+
+        password2 = fields[3]
+        password2.label = "Confirmación de contraseña"
+        password2.field.widget.attrs["class"] = "form-control text-center"
+        password2.help_text = "Introduce la misma contraseña que antes para verificar."
+
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("Este nombre de usuario ya existe")
+
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Este email ya está siendo usado")
+
+        return email
+
+    def save(self, *args, **kwargs):
+        user = super().save(*args, commit=False, **kwargs)
+        user.is_active = False
+        user.save()
+
+        to_email = user.email
+
+        return user
+
+
+class SignUpForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+
+        for visible in self.visible_fields():
+            visible.field.widget.attrs["class"] = "form-control text-center"

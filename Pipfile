@@ -8,10 +8,12 @@ pytest = "*"
 pytest-django = "*"
 mypy = "*"
 django-stubs = "*"
+black = "*"
 
 [packages]
 django = "*"
 mysqlclient = "*"
+pyverse = "*"
 
 [requires]
 python_version = "3.8"

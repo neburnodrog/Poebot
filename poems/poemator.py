@@ -1,10 +1,10 @@
 import random
+from pyverse import Pyverse
 from re import finditer
 from typing import Union, Optional, List, Dict, Set, Tuple, Any
 
 from django.db.models.query import QuerySet
 
-from poems.analyse_verses import Syllabifier
 from poems.models import Verse, AssonantRhyme, ConsonantRhyme
 
 from django.http import Http404
@@ -138,21 +138,21 @@ class PoemAutomator:
                                                  words_used=self.words_used[rhyme_code])
     
             for word in new_words_list:
-                syllables_new_word = Syllabifier(word).syllables
+                syllables_new_word = Pyverse(word).syllables
                 type_new_word = getting_word_type(word)  # 0: Noun or Adjetive, 1: Verb
                 first_letter_new_word = find_first_letter(word)
     
                 verse_to_use = random.choice(verses_w_type)
     
                 i = 0
-                while (Syllabifier(verse_to_use.last_word).syllables != syllables_new_word
+                while (Pyverse(verse_to_use.last_word).syllables != syllables_new_word
                        and getting_word_type(verse_to_use.last_word) != type_new_word
                        and first_letter_new_word != find_first_letter(verse_to_use.last_word)):
                     verse_to_use = random.choice(verses_w_type)
                     if i == 40:
                         break
     
-            if (Syllabifier(verse_to_use.last_word).syllables == syllables_new_word
+            if (Pyverse(verse_to_use.last_word).syllables == syllables_new_word
                     and getting_word_type(verse_to_use.last_word) == type_new_word
                     and first_letter_new_word == find_first_letter(verse_to_use.last_word)):
                 new_word = word
@@ -268,9 +268,9 @@ class RhymeSequence:
             return rhyme.strip("-")
 
         if rhyme_type == "assonant":
-            return Syllabifier(rhyme).assonant_rhyme
+            return Pyverse(rhyme).assonant_rhyme
 
-        return Syllabifier(rhyme).consonant_rhyme
+        return Pyverse(rhyme).consonant_rhyme
 
     def empty_lines_finder(self) -> Optional[List[int]]:
         if self.rhyme_sequence.count(" ") > 0:
