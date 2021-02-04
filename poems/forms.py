@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from django.conf import settings
+from poemautomator.settings import DEFAULT_FROM_EMAIL
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 
@@ -95,12 +95,25 @@ class RegisterForm(UserCreationForm):
 
         return email
 
-    def save(self, *args, **kwargs):
+    def save(self, request, *args, **kwargs):
         user = super().save(*args, commit=False, **kwargs)
         user.is_active = False
         user.save()
-
         to_email = user.email
+
+        context = {
+            "request": request,
+            "protocol": request.scheme,
+            "username": user.username,
+            "domain": request.META["HTTP_HOST"],
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "token": default_token_generator.make_token(user),
+        }
+
+        subject = render_to_string("email/activation_subject.txt", context)
+        email = render_to_string("email/activation_body.txt", context)
+
+        send_mail(subject, email, DEFAULT_FROM_EMAIL, [to_email])
 
         return user
 

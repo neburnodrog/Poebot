@@ -1,15 +1,19 @@
 # IMPORTS
 from urllib.parse import urlencode
-from django.contrib.auth.forms import User
 from pyverse import Pyverse
 import random
 
+from django.forms.forms import BaseForm
 from django.views.generic import ListView, FormView, TemplateView, DetailView
 from django.http import JsonResponse, HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.contrib.auth.models import User
-from django.forms.forms import BaseForm
+from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 
 from .forms import CreatePoemForm, RegisterForm
 from .models import Verse, AssonantRhyme, ConsonantRhyme
@@ -185,18 +189,31 @@ class RegisterView(FormView):
     form_class = RegisterForm
     success_url = "login"
 
-    def form_valid(self, form: BaseForm) -> HttpResponse:
-        user = User(
-            username=form.cleaned_data["username"],
-            email=form.cleaned_data["email"],
-            password=form.cleaned_data["password1"],
-        )
-        
-        user.is_active = False
-        
+
+def activate_account(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if (user is not None and default_token_generator.check_token(user, token)):
+        user.is_active = True
         user.save()
-        
-        return super().form_valid(form)
+        messages.add_message(
+            request, messages.INFO, 
+            'Cuenta activada. Ya puedes logearte.'
+        )
+    else:
+        messages.add_message(
+            request, messages.INFO, 
+            'El link ha expirado. Contacta al administrador para activarla.'
+        )
+
+    return HttpResponseRedirect(
+        reverse_lazy("poems:login")
+    )
+
 
 
 class ProfileView(DetailView):
