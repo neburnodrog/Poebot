@@ -11,7 +11,7 @@ urlpatterns = [
     path("validate/", views.validate_rhyme, name="validate_rhyme"),
     path("change_verse/", views.change_verse, name="change_verse"),
     path("accounts/", include("django.contrib.auth.urls")),
-    path("accounts/register", views.RegisterView.as_view(), name="register"),
+    path("accounts/register", views.register, name="register"),
     path("accounts/profile/<int:pk>/", views.ProfileView.as_view(), name="profile"),
     path("activate/<uidb64>/<token>/", views.activate_account, name="activate"),
 ]

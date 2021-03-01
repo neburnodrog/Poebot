@@ -1,6 +1,11 @@
 from django.contrib import admin
-from .models import Verse, AssonantRhyme, ConsonantRhyme, Word
+from .models import Verse, AssonantRhyme, ConsonantRhyme, Word, User
+from django.contrib.auth.admin import UserAdmin
 # Register your models here.
+
+
+class MyUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'is_active', 'is_staff', 'is_superuser')
 
 
 class AssonantAdmin(admin.ModelAdmin):
@@ -30,3 +35,5 @@ admin.site.register(AssonantRhyme, AssonantAdmin)
 admin.site.register(ConsonantRhyme, ConsonantAdmin)
 admin.site.register(Word, WordAdmin)
 admin.site.register(Verse, VerseAdmin)
+admin.site.unregister(User)
+admin.site.register(User, MyUserAdmin)

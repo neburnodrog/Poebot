@@ -1,5 +1,5 @@
 html {
-  font-size: calc(0.55rem + 1vw);
+  font-size: calc(1rem * 0.9vw);
 }
 
 body {
@@ -11,18 +11,18 @@ nav {
 }
 
 .jumbotron {
-    border-radius:5px;
-    background-color: #0f3a48;
+  border-radius: 5px;
+  background-color: #0f3a48;
 }
 
 #poebot-logo {
-    width: calc(80px + 1vw);
+  width: calc(80px + 1vw);
 }
 
 .oi {
   padding: 2px;
   border-radius: 5px;
-  background-color:white;
+  background-color: white;
 }
 
 svg {
@@ -31,13 +31,18 @@ svg {
   background-color: white;
 }
 
-label, h1 {
+label,
+h1 {
   color: rgb(209, 205, 199);
 }
 
 p {
   margin: 2px;
   color: rgb(209, 205, 199);
+}
+
+.errorlist {
+  border-radius: 5px;
 }
 
 /*

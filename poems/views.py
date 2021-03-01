@@ -184,10 +184,24 @@ def change_verse(request: HttpRequest) -> JsonResponse:
     return JsonResponse(data)
 
 
-class RegisterView(FormView):
-    template_name = "registration/register.html"
-    form_class = RegisterForm
-    success_url = "login"
+
+def register(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            HttpResponseRedirect(
+                reverse_lazy("poems:login")
+            )
+
+    else:
+        form = RegisterForm()
+
+    return render(
+        request, 
+        template_name="registration/register.html",
+        context={"form": form},
+    )
 
 
 def activate_account(request, uidb64, token):

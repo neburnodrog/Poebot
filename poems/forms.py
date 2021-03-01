@@ -95,11 +95,13 @@ class RegisterForm(UserCreationForm):
 
         return email
 
-    def save(self, request, *args, **kwargs):
+    def save(self, *args, **kwargs):
         user = super().save(*args, commit=False, **kwargs)
         user.is_active = False
         user.save()
         to_email = user.email
+
+        request = self.request
 
         context = {
             "request": request,
