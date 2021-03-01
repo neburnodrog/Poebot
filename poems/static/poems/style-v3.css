@@ -1,22 +1,25 @@
 html {
-  font-size: calc(1rem * 0.9vw);
+  font-size: calc(0.5rem + 0.7vw);
+  font-family: "lores-9-wide", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 body {
-  background-color: #020c15;
-}
-
-nav {
-  background-color: #020c15;
+  background-color: #0f3a48;
+  font-family: inherit;
 }
 
 .jumbotron {
-  border-radius: 5px;
-  background-color: #0f3a48;
+  background-color: inherit;
+}
+
+#poebot-title {
+  font-size: 5em;
 }
 
 #poebot-logo {
-  width: calc(80px + 1vw);
+  font-size: 2em;
 }
 
 .oi {
@@ -45,6 +48,14 @@ p {
   border-radius: 5px;
 }
 
+.verse {
+  font-family: Roboto;
+}
+
+#info-icon {
+  position: relative;
+  transform: translate(150%, -25%);
+}
 /*
 Extra small devices (portrait phones, less than 544px)
 No media query since this is the default in Bootstrap because it is "mobile first"

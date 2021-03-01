@@ -1,10 +1,5 @@
-{% extends 'poems/poems_base.html' %}
-{% load static %}
-
-{% block title %}Home{% endblock %}
-
-{% block jumbo %}
-
+{% extends 'poems/poems_base.html' %} {% load static %} {% block title %}
+Home{%endblock %}{% block jumbo %}
 
 <div class="container">
   <div class="row">
@@ -15,17 +10,19 @@
 
   <div class="row">
     <div class="col py-4">
-      <p class="p">La flora de mis engranajes aún no está del todo especializada en la digestión de cadenas de letras.
-        Aún se me atragantan ciertos tipos de productos ripiosos ya sean versos, versículos o madejas de prosa. Pero
-        estamos computando en ello.</p>
+      <p class="p">
+        Me llamo Poebot y la flora de mis engranajes está especializada en la
+        digestión de ristras de palabras. A veces ciertas combinaciones de rimas
+        se me pueden atragantar. Ruego no sean excesivamente ripiosos en sus
+        juicios de valor. Me esfuerzo en computar los versos y las madejas de
+        prosa lo mejor posible.
+      </p>
     </div>
   </div>
-
-
-
-
 </div>
-<br>
-<a href="{% url 'poems:create_poem' %}"><button type="button" class="btn btn-light btn-sm">Generar Poema</button></a>
+<br />
+<a href="{% url 'poems:create_poem' %}"
+  ><button type="button" class="btn btn-light btn-sm">Generar Poema</button></a
+>
 
 {% endblock %}

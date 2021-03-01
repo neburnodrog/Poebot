@@ -1,21 +1,20 @@
-{% extends "poems/poems_base.html" %}
-{% load static %}
-{% block title %}Poem{% endblock %}
-
-{% block jumbo %}
+{% extends "poems/poems_base.html" %} {% load static %} {% block title %} Poem
+{% endblock %} {% block jumbo %}
 <div id="poem" class="container">
+  <br />
 
-
-  <br>
-
-  {% for verse in object_list %}
-
-  {% if verse %}
+  {% for verse in object_list %} {% if verse %}
   <div class="row">
     <div class="col-1 d-none d-sm-block my-auto"></div>
     <div class="col-10 align-self-center text-left">
-      <p id="{{verse.id}}" name="verse_id" class="verse ver_num_{{forloop.counter}}" contenteditable="true">
-        {{ verse.verse_text }}</p>
+      <p
+        id="{{verse.id}}"
+        name="verse_id"
+        class="verse ver_num_{{forloop.counter}}"
+        contenteditable="true"
+      >
+        {{ verse.verse_text }}
+      </p>
     </div>
     <div class="col-1 d-sm-block my-auto">
       <span class="oi oi-loop-circular" title="icon loop-circular"></span>
@@ -23,31 +22,30 @@
 
     {% else %}
     <div class="row">
-
-      <div class="col"><br></div>
-
+      <div class="col"><br /></div>
 
       {% endif %}
     </div>
     {% empty %}
     <div class="col">No verses yet.</div>
 
-
     {% endfor %}
 
-    <br><br><br>
+    <br /><br /><br />
     <div class="row">
       <div class="col">
         <p>
-          <button class="btn btn-light btn-sm" id="reload">Refrescar</button>
-          <a href="{% url 'poems:create_poem' %}"><button class="btn btn-light btn-sm">Otro Poema</button></a>
+          <button class="btn btn-light btn-sm mx-5" id="reload">
+            Refrescar
+          </button>
+          <a href="{% url 'poems:create_poem' %}"
+            ><button class="btn btn-light btn-sm mx-5">Otro Poema</button></a
+          >
         </p>
       </div>
     </div>
   </div>
 </div>
-  {% endblock %}
-
-  {% block scripts %}
-  <script src="{% static 'poems/poem-v3.js' %}" type="text/javascript"></script>
-  {% endblock %}
+{% endblock %} {% block scripts %}
+<script src="{% static 'poems/poem-v3.js' %}" type="text/javascript"></script>
+{% endblock %}
