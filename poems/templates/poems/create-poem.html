@@ -42,7 +42,7 @@ Poem{% endblock %} {% block jumbo %}
     {% endfor %}
 
     <div class="row justify-content-center">
-      <div class="col-auto">
+      <div class="col-10 col-sm-8 px-1">
         <div class="form-group" id="hidden_select_group" style="display: none">
           <label for="id_select_verses">Quieres elegir las rimas?</label>
           <select class="form-control text-center" id="id_select_verses">
@@ -51,6 +51,17 @@ Poem{% endblock %} {% block jumbo %}
             <!-- TODO https://getbootstrap.com/docs/4.1/components/collapse/#example -->
           </select>
         </div>
+      </div>
+      <div class="col-auto p-2 mx-2 mb-3 align-self-center">
+        <svg
+          id="placeholder-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-info-circle"
+          viewBox="0 0 16 16"
+        ></svg>
       </div>
     </div>
 
