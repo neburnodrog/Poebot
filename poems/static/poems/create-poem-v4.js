@@ -1,12 +1,18 @@
-$(document).ready(function () {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var jquery_1 = __importDefault(require("jquery"));
+jquery_1.default(document).ready(function () {
     // jQuery SELECTOR variables
-    var $rhySeq = $("#id_rhy_seq");
-    var $hiddenContainer = $("#hidden-container");
-    var $hidden = $("#hidden");
-    var $verLen = $("#id_verse_length");
-    var $verNum = $("#id_ver_num");
-    var $selVer = $('#id_select_verses');
-    var $hiddenSelGroup = $('#hidden_select_group');
+    var $rhySeq = jquery_1.default("#id_rhy_seq");
+    var $hiddenContainer = jquery_1.default("#hidden-container");
+    var $hidden = jquery_1.default("#hidden");
+    var $verLen = jquery_1.default("#id_verse_length");
+    var $verNum = jquery_1.default("#id_ver_num");
+    var $selVer = jquery_1.default("#id_select_verses");
+    var $hiddenSelGroup = jquery_1.default("#hidden_select_group");
     //## VARIABLES ##//
     var asson_words = [
         ["gominola", "-oa"],
@@ -61,7 +67,8 @@ $(document).ready(function () {
     function uniqueChar(rhymeSequence) {
         var uniqueValuesArray = [];
         for (var i = 0; i < rhymeSequence.length; i++) {
-            if (uniqueValuesArray.includes(rhymeSequence[i])) { }
+            if (uniqueValuesArray.includes(rhymeSequence[i])) {
+            }
             else {
                 uniqueValuesArray.push(rhymeSequence[i]);
             }
@@ -71,33 +78,37 @@ $(document).ready(function () {
     function uniqueRhymes(rhymeSequenceString) {
         /* return it as array without the whitespaces */
         var rhySequenceArray = rhymeSequenceString
-            .split(' ')
-            .join('')
-            .split('');
+            .split(" ")
+            .join("")
+            .split("");
         return uniqueChar(rhySequenceArray);
     }
     /*## CREATE FORM DINAMICALLY FUNCS ##*/
     function createInput(rhymeKey, rhymeType) {
-        var input = $("<input>", {
+        var input = jquery_1.default("<input>", {
             type: "text",
-            "class": "form-control rhyme_validator",
+            class: "form-control rhyme_validator",
             name: rhymeKey,
             id: rhymeKey,
-            required: true
+            required: true,
         });
         input.keyup(function () {
-            if ($(this).val() === "") {
-                resetToNeutral($(this), choose_message(rhymeType));
+            if (jquery_1.default(this).val() === "") {
+                resetToNeutral(jquery_1.default(this), choose_message(rhymeType));
             }
         });
         input.change(function () {
-            var $input = $(this);
+            var $input = jquery_1.default(this);
             var inputVal = String($input.val());
             if (/^-?[a-zA-ZñÑÓóÁáÉéíÍúÚü]+$/.test(inputVal)) {
-                $.ajax({
+                jquery_1.default.ajax({
                     url: "/validate/",
-                    data: $(this).serialize() + "&" + $rhySeq.serialize() + "&" + $verLen.serialize(),
-                    dataType: 'json',
+                    data: jquery_1.default(this).serialize() +
+                        "&" +
+                        $rhySeq.serialize() +
+                        "&" +
+                        $verLen.serialize(),
+                    dataType: "json",
                     success: function (resp_data) {
                         if (resp_data.not_valid) {
                             validInvalid($input, resp_data.error_message, false);
@@ -105,22 +116,22 @@ $(document).ready(function () {
                         else {
                             validInvalid($input, "La rima es válida y existe en la base de datos.", true);
                         }
-                    }
+                    },
                 });
             }
             else {
                 var err_msg = "Solo se permiten caracteres alfabéticos y el guión.";
-                validInvalid($(this), err_msg, false);
+                validInvalid(jquery_1.default(this), err_msg, false);
             }
         });
         return input;
     }
     function createRhymeField(rhymeKey) {
-        var $rhymeDivRow = $("<div>", {
-            "class": 'row justify-content-center'
+        var $rhymeDivRow = jquery_1.default("<div>", {
+            class: "row justify-content-center",
         });
-        var $rhymeDivCol = $("<div>", {
-            "class": 'col-auto col-sm-8 mb-2'
+        var $rhymeDivCol = jquery_1.default("<div>", {
+            class: "col-auto col-sm-8 mb-2",
         });
         var rhymeType;
         if (rhymeKey === rhymeKey.toUpperCase()) {
@@ -129,12 +140,13 @@ $(document).ready(function () {
         else {
             rhymeType = "asonante";
         }
-        var $label = $("<label>").attr("for", rhymeKey).text("Rima " + rhymeType + " " + rhymeKey + ":");
+        var $label = jquery_1.default("<label>")
+            .attr("for", rhymeKey)
+            .text("Rima " + rhymeType + " " + rhymeKey + ":");
         var $input = createInput(rhymeKey, rhymeType);
-        var $small = $("<small>", {
-            "class": 'form-text text-muted'
-        })
-            .text(choose_message(rhymeType));
+        var $small = jquery_1.default("<small>", {
+            class: "form-text text-muted",
+        }).text(choose_message(rhymeType));
         $hiddenContainer.append($rhymeDivRow);
         $rhymeDivRow.append($rhymeDivCol);
         $rhymeDivCol.append($label, $input, $small);
@@ -161,18 +173,18 @@ $(document).ready(function () {
         }
         var small = inputElem.next().removeClass("text-muted");
         if (inputElem.hasClass("is-valid")) {
-            small.removeClass("invalid-feedback")
-                .addClass("valid-feedback");
+            small.removeClass("invalid-feedback").addClass("valid-feedback");
         }
         else if (inputElem.hasClass("is-invalid")) {
-            small.removeClass("valid-feedback")
-                .addClass("invalid-feedback");
+            small.removeClass("valid-feedback").addClass("invalid-feedback");
         }
         small.text(msg);
     }
     function resetToNeutral(inputElem, msg) {
         inputElem.removeClass("is-invalid").removeClass("is-valid");
-        var small = inputElem.next().removeClass("invalid-feedback")
+        var small = inputElem
+            .next()
+            .removeClass("invalid-feedback")
             .removeClass("valid-feedback")
             .addClass("text-muted")
             .text(msg);
@@ -187,20 +199,16 @@ $(document).ready(function () {
             validInvalid($rhySeq, "Tiene buena pinta", true);
             return true;
         }
-        else {
-            if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
-                var err_msg = "Solo valen caracteres del abecedario y espacios en blanco";
-                validInvalid($rhySeq, err_msg, false);
-                selVerIsValid();
-                return false;
-            }
-            else if (rhySeqVal.split(" ").join("").length != Number(verNumVal)) {
-                var err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)";
-                validInvalid($rhySeq, err_msg, false);
-                selVerIsValid();
-                return false;
-            }
+        else if (/^[a-zA-ZñÑ\s]+$/.test(rhySeqVal) == false) {
+            var err_msg_1 = "Solo valen caracteres del abecedario y espacios en blanco";
+            validInvalid($rhySeq, err_msg_1, false);
+            selVerIsValid();
+            return false;
         }
+        var err_msg = "El número de caracteres ha de coincidir con el número de versos (sin contar espacios)";
+        validInvalid($rhySeq, err_msg, false);
+        selVerIsValid();
+        return false;
     }
     function rhySeqOnLoad() {
         if ($rhySeq.val() === "") {
@@ -219,36 +227,38 @@ $(document).ready(function () {
     /*## NUMBER OF VERSES INPUT FIELD VALIDATION FUNCS ##*/
     function verNumIsValid() {
         var verNumVal = $verNum.val();
-        if ($verNum.val() == "") {
-            resetToNeutral($verNum, "Min: 1, Max: 20");
-            return true;
-        }
-        else if (0 < verNumVal && verNumVal < 21) {
-            validInvalid($verNum, "Tiene buena pinta.", true);
-            return true;
-        }
-        else {
+        if (typeof verNumVal === "string") {
+            if ($verNum.val() == "") {
+                resetToNeutral($verNum, "Min: 1, Max: 20");
+                return true;
+            }
+            else if (0 < +verNumVal && +verNumVal < 21) {
+                validInvalid($verNum, "Tiene buena pinta.", true);
+                return true;
+            }
             validInvalid($verNum, "Solo números. Min: 1, Max: 20", false);
             return false;
         }
+        return false;
     }
     /*## LENGTH OF VERSES INPUT FIELD VALIDATION FUNCS ##*/
     function verLenIsValid() {
         var verLenVal = $verLen.val();
-        if ($verLen.val() == "") {
-            resetToNeutral($verLen, "Min: 5, Max: 14");
-        }
-        else if (4 < verLenVal && verLenVal < 15) {
-            validInvalid($verLen, "Tiene buena pinta.", true);
-            return true;
-        }
-        else {
+        if (typeof verLenVal === "string") {
+            if ($verLen.val() == "") {
+                resetToNeutral($verLen, "Min: 5, Max: 14");
+            }
+            else if (4 < +verLenVal && +verLenVal < 15) {
+                validInvalid($verLen, "Tiene buena pinta.", true);
+                return true;
+            }
             validInvalid($verLen, "Solo números. Min: 5, Max: 14", false);
             return false;
         }
+        return false;
     }
     function selVerIsValid() {
-        if (String($selVer.val()) === 'yes') {
+        if (String($selVer.val()) === "yes") {
             if ($rhySeq.hasClass("is-valid")) {
                 if ($selVer.hasClass("is-invalid")) {
                     validInvalid($selVer, "", true);
@@ -262,19 +272,22 @@ $(document).ready(function () {
                 $hiddenContainer.empty();
                 $hidden.hide();
             }
-            ;
         }
         else {
             $hiddenContainer.empty();
             $hidden.hide();
         }
-        ;
     }
     /*## POPOVER ACTIVATION ##*/
-    $(".popover").each(function () {
-        var text = $(this).parent().prev()
-            .children().eq(0).children()
-            .eq(0).text();
+    jquery_1.default(".popover").each(function () {
+        var text = jquery_1.default(this)
+            .parent()
+            .prev()
+            .children()
+            .eq(0)
+            .children()
+            .eq(0)
+            .text();
         if (text === "Número de versos:") {
             var message = "Un número entre 1 y 20 para que germine un poema. Si se deja en blanco será un número aleatorio de versos.";
             var where = "top";
@@ -287,10 +300,10 @@ $(document).ready(function () {
             var message = "Mayúsculas: rima consonante. Minúsculas: asonante. Espacio en blanco: verso en blanco. El campo vacío producirá poemas sin rima.";
             var where = "bottom";
         }
-        $(this).attr("data-placement", where).attr("data-content", message);
+        jquery_1.default(this).attr("data-placement", where).attr("data-content", message);
     });
-    $('[data-toggle="popover"]').popover({
-        trigger: "focus"
+    jquery_1.default('[data-toggle="popover"]').popover({
+        trigger: "focus",
     });
     /* ON READY VERIFICATION OF FIELDS */
     verNumIsValid();
@@ -299,39 +312,39 @@ $(document).ready(function () {
     selVerIsValid();
     /*## EVENT LISTENERS ##*/
     $verNum.on("change, blur", function () {
-        var verNumVal = $(this).val();
-        if (verNumVal === "") {
-            resetToNeutral($(this), "Min: 1, Max: 20");
-        }
-        else if (0 < verNumVal && verNumVal < 21) {
-            validInvalid($(this), "Esto número tiene buena pinta.", true); /* Tiene buena pinta */
-        }
-        else {
-            var error_message = "Sólo números. Min: 1, Max: 20";
-            validInvalid($(this), error_message, false);
-        }
-        if ($rhySeq.val() !== "") {
-            rhySeqIsValid();
+        var verNumVal = jquery_1.default(this).val();
+        if (typeof verNumVal === "string") {
+            if (verNumVal === "")
+                resetToNeutral(jquery_1.default(this), "Min: 1, Max: 20");
+            else if (0 < +verNumVal && +verNumVal < 21) {
+                validInvalid(jquery_1.default(this), "Esto número tiene buena pinta.", true); /* Tiene buena pinta */
+            }
+            else
+                validInvalid(jquery_1.default(this), "Sólo números. Min: 1, Max: 20", false);
+            if ($rhySeq.val() !== "")
+                rhySeqIsValid();
         }
     });
     $verLen.on("change, blur", function () {
-        var verLenVal = $(this).val();
-        if (verLenVal === "") {
-            resetToNeutral($(this), "Min: 5, Max: 14");
-        }
-        else if (4 < verLenVal && verLenVal < 15) {
-            var message = "Me gusta, no parece un número indigesto.";
-            validInvalid($(this), message, true);
-        }
-        else {
-            var error_message = "Sólo números. Min: 5, Max: 14";
-            validInvalid($(this), error_message, false);
+        var verLenVal = jquery_1.default(this).val();
+        if (typeof verLenVal === "string") {
+            if (verLenVal === "") {
+                resetToNeutral(jquery_1.default(this), "Min: 5, Max: 14");
+            }
+            else if (4 < +verLenVal && +verLenVal < 15) {
+                var message = "Me gusta, no parece un número indigesto.";
+                validInvalid(jquery_1.default(this), message, true);
+            }
+            else {
+                var error_message = "Sólo números. Min: 5, Max: 14";
+                validInvalid(jquery_1.default(this), error_message, false);
+            }
         }
     });
     $rhySeq.keyup(function () {
         $hiddenSelGroup.show();
-        if ($(this).val() === "") {
-            resetToNeutral($(this), "Ejemplo: ABBA ABBA");
+        if (jquery_1.default(this).val() === "") {
+            resetToNeutral(jquery_1.default(this), "Ejemplo: ABBA ABBA");
             $hiddenContainer.empty;
             $hiddenSelGroup.hide();
             $hidden.hide();
@@ -343,22 +356,24 @@ $(document).ready(function () {
     $selVer.change(function () {
         selVerIsValid();
     });
-    $("form").submit(function (event) {
-        if ($(".is-invalid").length > 0) {
+    jquery_1.default("form").submit(function (event) {
+        if (jquery_1.default(".is-invalid").length > 0) {
             alert("Todavía hay valores incorrectos");
             event.preventDefault();
         }
         else {
             /*<button class="btn btn-primary" type="button" disabled>
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Loading...
-            </button>*/
-            var $submit = $("#submit").attr("disabled", "true").text(" Generar Poema");
-            var $loadingGif = $("<span>", {
-                "class": "spinner-border spinner-border-sm"
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Loading...
+                </button>*/
+            var $submit = jquery_1.default("#submit")
+                .attr("disabled", "true")
+                .text(" Generar Poema");
+            var $loadingGif = jquery_1.default("<span>", {
+                class: "spinner-border spinner-border-sm",
             });
             $submit.prepend($loadingGif);
-            $(this).off().submit();
+            jquery_1.default(this).off().submit();
         }
     });
 });

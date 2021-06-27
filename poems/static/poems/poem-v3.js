@@ -1,3 +1,4 @@
+"use strict";
 $(document).ready(function () {
     $('#reload').click(function () {
         var $submit = $("#reload").attr("disabled", "true").text(" Refrescar");
