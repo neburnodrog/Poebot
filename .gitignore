@@ -13,7 +13,7 @@ media
 *.bak
 
 # PyCharm #
-/.idea
+.idea
 
 # VSCode #
 /.vscode
