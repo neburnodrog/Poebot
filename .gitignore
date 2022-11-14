@@ -76,3 +76,5 @@ backup/
 /static
 poems/tests/
 poemautomator/local_settings.py
+
+node_modules
